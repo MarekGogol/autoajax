@@ -1,97 +1,146 @@
-window.autoAjax = {
-    messages : {
-        errorMessage : __('Nastala nečakaná chyba, skúste neskôr prosím.'),
-        validationError: __('Nevyplnili ste všetky potrebné položky správne.'),
-    },
-    bindRow : function(obj){
-        /*
-         * Bind form values
-         */
-        var data = obj||$(this).attr('data-row');
+(function ($) {
+    window.autoAjax = {
+        options : {
+            messages : {
+                errorMessage : 'Something went wrong, please try again later.',
+                validationError: 'Please fill all required fields.',
+            },
+        },
+        bindRow : function(obj){
+            /*
+             * Bind form values
+             */
+            var data = obj||$(this).attr('data-row');
 
-        if ( data )
-        {
-            var data = obj||$.parseJSON( data );
-
-            for ( key in data )
+            if ( data )
             {
-                var input = $(this).find('*[name="'+key+'"]');
+                var data = obj||$.parseJSON( data );
 
-                if ( (!data[key] || data[key].length == 0) && (data[key] !== false && data[key] !== 0) )
+                for ( key in data )
                 {
-                    continue;
+                    var input = $(this).find('*[name="'+key+'"]');
+
+                    if ( (!data[key] || data[key].length == 0) && (data[key] !== false && data[key] !== 0) )
+                    {
+                        continue;
+                    }
+
+                    autoAjax.bindValue($(this), input, key, data[key]);
+                }
+            }
+        },
+        bindValue : function(form, input, key, value){
+            if ( input.is('input:file') )
+                return;
+
+            if ( input.is('input:radio') || input.is('input:checkbox') )
+            {
+                if ( value === true )
+                    value = 1;
+                else if ( value === false )
+                    value = 0;
+
+                input = form.find('*[name="'+key+'"][value="'+value+'"]');
+                input.prop("checked", true).change();
+            } else {
+                if ( value === true )
+                    value = 1;
+                else if ( value === false )
+                    value = 0;
+
+                input.val(value).change().trigger("chosen:updated");
+
+                if ( input.hasClass('v-model') ){
+                    input[0].dispatchEvent(new Event('input', { 'bubbles': true }))
+                }
+            }
+        },
+        /*
+         * Datepicker in form
+         */
+        bindDatepickers(){
+            if ( ! ('datepicker' in jQuery.fn) )
+                return;
+
+            $(this).find('.js_date').datepicker({
+                autoclose: true,
+                format: 'dd.mm.yyyy',
+                language: 'sk',
+            });
+        },
+        resetErrors : function(form){
+            form.find('.message, .alert').html('').hide();
+            form.find('span.error').remove();
+            form.find('.has-error').removeClass('has-error');
+            form.find('input.error, select.error, textarea.error').removeClass('error');
+        },
+        setMessage : function(form, message, type){
+            form.parent().find('.alert').removeClass('alert-danger alert-success').addClass(type == 'error' ? 'alert-danger' : 'alert-success').html(message).show();
+
+            if ( type == 'success' && form.find('.form-items') )
+                form.find('.form-items').slideUp(200)
+            else {
+                $('html, body').animate({
+                    scrollTop: form.offset().top
+                }, 500);
+            }
+        },
+        /*
+         * Show modal with callback
+         */
+        showModal(response){
+            modal.show(response);
+        },
+        /*
+         * Return correct ajax response
+         */
+        ajaxResponse(response, form)
+        {
+            //If form has own response callback
+            if ( form && form.attr('data-callback') )
+                return window[form.attr('data-callback')].call(null, response);
+
+            if ( 'error' in response || 'message' in response || 'callback' in response )
+            {
+                if ( response.type == 'modal' )
+                {
+                    autoAjax.showModal(response);
+                } else {
+                    autoAjax.setMessage(form , response.message, 'message' in response ? 'success' : 'error');
+
+                    if ( 'callback' in response )
+                        eval(response.callback);
                 }
 
-                autoAjax.bindValue($(this), input, key, data[key]);
-            }
-        }
-    },
-    bindValue : function(form, input, key, value){
-        if ( input.is('input:file') )
-            return;
+                return true;
+            } else if ( 'redirect' in response )
+            {
+                if ( response.redirect == window.location.href )
+                    return window.location.reload();
 
-        if ( input.is('input:radio') || input.is('input:checkbox') )
+                window.location.href = response.redirect;
+
+                return true;
+            }
+
+            return false;
+        },
+        unknownError()
         {
-            if ( value === true )
-                value = 1;
-            else if ( value === false )
-                value = 0;
+            autoAjax.showModal({
+                message : autoAjax.errorMessage
+            });
+        },
+    }
 
-            input = form.find('*[name="'+key+'"][value="'+value+'"]');
-            input.prop("checked", true).change();
-        } else {
-            if ( value === true )
-                value = 1;
-            else if ( value === false )
-                value = 0;
-
-            input.val(value).change().trigger("chosen:updated");
-
-            if ( input.hasClass('v-model') ){
-                input[0].dispatchEvent(new Event('input', { 'bubbles': true }))
-            }
+    $.fn.autoAjax = function(options){
+        //Rewrite default options
+        for ( var key in options||{} ) {
+            autoAjax.options[key] = options[key];
         }
-    },
-    /*
-     * Datepicker in form
-     */
-    bindDatepickers(){
-        if ( ! ('datepicker' in jQuery.fn) )
-            return;
 
-        $(this).find('.js_date').datepicker({
-            autoclose: true,
-            format: 'dd.mm.yyyy',
-            language: 'sk',
-        });
-    },
-    resetErrors : function(form){
-        form.find('.message, .alert').html('').hide();
-        form.find('span.error').remove();
-        form.find('.has-error').removeClass('has-error');
-        form.find('input.error, select.error, textarea.error').removeClass('error');
-    },
-    setMessage : function(form, message, type){
-        form.parent().find('.alert').removeClass('alert-danger alert-success').addClass(type == 'error' ? 'alert-danger' : 'alert-success').html(message).show();
-
-        if ( type == 'success' && form.find('.form-items') )
-            form.find('.form-items').slideUp(200)
-        else {
-            $('html, body').animate({
-                scrollTop: form.offset().top
-            }, 500);
-        }
-    },
-    /*
-     * Show modal with callback
-     */
-    showModal(response){
-        modal.show(response);
-    },
-    fn : function(data){
-        $(this).each(function(){
-
-            autoAjax.bindRow.call(this, data);
+        return $(this).each(function(){
+            autoAjax.bindRow.call(this);
             autoAjax.bindDatepickers.call(this);
 
             if ( this._autoAjax === true )
@@ -168,58 +217,16 @@ window.autoAjax = {
                             }
 
                             if ( ! form.hasClass('noErrorMessage') )
-                                autoAjax.setMessage(form, autoAjax.messages.validationError, 'error');
+                                autoAjax.setMessage(form, autoAjax.options.messages.validationError, 'error');
                         }
                     } else {
-                        autoAjax.setMessage(form, obj ? obj.message||autoAjax.errorMessage : autoAjax.errorMessage, 'error');
+                        autoAjax.setMessage(form, obj ? obj.message||autoAjax.errorMessage : autoAjax.options.errorMessage, 'error');
                     }
                   }
                 });
 
                 return false;
             });
-        })
-    },
-    /*
-     * Return correct ajax response
-     */
-    ajaxResponse(response, form)
-    {
-        //If form has own response callback
-        if ( form && form.attr('data-callback') )
-            return window[form.attr('data-callback')].call(null, response);
-
-        if ( 'error' in response || 'message' in response || 'callback' in response )
-        {
-            if ( response.type == 'modal' )
-            {
-                autoAjax.showModal(response);
-            } else {
-                autoAjax.setMessage(form , response.message, 'message' in response ? 'success' : 'error');
-
-                if ( 'callback' in response )
-                    eval(response.callback);
-            }
-
-            return true;
-        } else if ( 'redirect' in response )
-        {
-            if ( response.redirect == window.location.href )
-                return window.location.reload();
-
-            window.location.href = response.redirect;
-
-            return true;
-        }
-
-        return false;
-    },
-    unknownError()
-    {
-        autoAjax.showModal({
-            message : autoAjax.errorMessage
         });
-    },
-}
-
-jQuery.fn.autoAjax = autoAjax.fn;
+    };
+})($);
