@@ -1,0 +1,11 @@
+{
+  "name": "autoajax",
+  "version": "1.0.0",
+  "description": "AutoAjax form library for sending forms and automaticall laravel validation.",
+  "main": "autoajax.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
