@@ -1,3 +1,5 @@
+require('jquery-form/jquery.form.js');
+
 (function ($) {
     window.autoAjax = {
         options : {
