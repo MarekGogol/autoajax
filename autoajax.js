@@ -1,36 +1,119 @@
 require('jquery-form/jquery.form.js');
 
-(function ($) {
-    window.autoAjax = {
-        options : {
-            messages : {
-                errorMessage : 'Something went wrong, please try again later.',
-                validationError: 'Please fill all required fields.',
+const autoAjax = {
+    options : {
+        //Global messages
+        messages : {
+            errorMessage : 'Something went wrong, please try again later.',
+            validationError: 'Please fill all required fields.',
+        },
+        events: {
+            success(data, response, form){
+
+            },
+            error(data, response, form){
+
+            },
+            validationError(data, response, form){
+
             },
         },
+        //Global callback events for every form, such as validation, error handling etc...
+        globalEvents : {
+            success(data, response, form){
+                //Reset form on success message if has autoReset class
+                if ( form.hasClass('autoReset') && !('error' in response) )
+                    form.find('input, select, textarea').not('input[name="_token"], input[type="submit"], input[type="hidden"]').val('');
+
+                //Does not process success events if returned data is not object type
+                if ( typeof data != 'object' )
+                    return;
+
+                //Show messages
+                if ( 'error' in data || 'message' in data || 'callback' in data ) {
+                    if ( data.type == 'modal' ) {
+                        autoAjax.core.showModal(data);
+                    } else {
+                        autoAjax.core.setMessage(form , data.message, 'message' in data ? 'success' : 'error');
+
+                        if ( 'callback' in data )
+                            eval(data.callback);
+                    }
+
+                    return true;
+                }
+
+                //Redirect on callback
+                else if ( 'redirect' in data ) {
+                    if ( data.redirect == window.location.href )
+                        return window.location.reload();
+
+                    window.location.href = data.redirect;
+                }
+            },
+            error(data, response, form){
+                var obj = response.responseJSON;
+
+                autoAjax.core.setMessage(form, obj ? obj.message||autoAjax.options.messages.errorMessage : autoAjax.options.messages.errorMessage, 'error');
+            },
+            validationError(data, response, form){
+                var obj = response.responseJSON;
+
+                if ( response.status == 422 )
+                {
+                    //Laravel 5.5 provides validation errors in errors object.
+                    if ( 'errors' in obj && !('length' in obj.errors) )
+                        obj = obj.errors;
+
+                    for ( var key in obj )
+                    {
+                        var message = $.isArray(obj[key]) ? obj[key][0] : obj[key];
+
+                        form.find('input[name="'+key+'"], select[name="'+key+'"], textarea[name="'+key+'"]')
+                            .after('<span class="help-block error">'+message+'</span>')
+                            .first().parent().addClass('has-error')
+                            .keyup(function(e){
+                                if ( e.keyCode == 13 )
+                                    return;
+
+                                $(this).removeClass('has-error');
+                                $(this).find('span.error.help-block').remove();
+                            });
+                    }
+
+                    if ( ! form.hasClass('noErrorMessage') )
+                        autoAjax.core.setMessage(form, autoAjax.options.messages.validationError, 'error');
+                }
+            },
+        }
+    },
+
+    core : {
+        /**
+         * Automatically bind form values from data-row attribute
+         *
+         * @param  object/json  obj
+         */
         bindRow : function(obj){
-            /*
-             * Bind form values
-             */
             var data = obj||$(this).attr('data-row');
 
-            if ( data )
-            {
+            if ( data ) {
                 var data = obj||$.parseJSON( data );
 
-                for ( key in data )
-                {
+                for ( key in data ) {
                     var input = $(this).find('*[name="'+key+'"]');
 
-                    if ( (!data[key] || data[key].length == 0) && (data[key] !== false && data[key] !== 0) )
-                    {
+                    if ( (!data[key] || data[key].length == 0) && (data[key] !== false && data[key] !== 0) ) {
                         continue;
                     }
 
-                    autoAjax.bindValue($(this), input, key, data[key]);
+                    autoAjax.core.bindValue($(this), input, key, data[key]);
                 }
             }
         },
+        /**
+         * Bind value into input
+         */
         bindValue : function(form, input, key, value){
             if ( input.is('input:file') )
                 return;
@@ -58,7 +141,7 @@ require('jquery-form/jquery.form.js');
             }
         },
         /*
-         * Datepicker in form
+         * Datepicker inputs into form
          */
         bindDatepickers(){
             if ( ! ('datepicker' in jQuery.fn) )
@@ -70,22 +153,31 @@ require('jquery-form/jquery.form.js');
                 language: 'sk',
             });
         },
+        /**
+         * Reset all errors
+         *
+         * @param  element  form
+         */
         resetErrors : function(form){
             form.find('.message, .alert').html('').hide();
-            form.find('span.error').remove();
+            form.find('span.error.help-block').remove();
             form.find('.has-error').removeClass('has-error');
             form.find('input.error, select.error, textarea.error').removeClass('error');
         },
+        /**
+         * Set form message
+         *
+         * @param  element  form
+         * @param  string  message
+         * @param  string  type
+         */
         setMessage : function(form, message, type){
-            form.parent().find('.alert').removeClass('alert-danger alert-success').addClass(type == 'error' ? 'alert-danger' : 'alert-success').html(message).show();
-
-            if ( type == 'success' && form.find('.form-items') )
-                form.find('.form-items').slideUp(200)
-            else {
-                $('html, body').animate({
-                    scrollTop: form.offset().top
-                }, 500);
-            }
+            form.parent()
+                .find('.alert')
+                .removeClass('alert-danger alert-success')
+                .addClass(type == 'error' ? 'alert-danger' : 'alert-success')
+                .html(message)
+                .show();
         },
         /*
          * Show modal with callback
@@ -98,137 +190,92 @@ require('jquery-form/jquery.form.js');
          */
         ajaxResponse(response, form)
         {
-            //If form has own response callback
-            if ( form && form.attr('data-callback') )
-                return window[form.attr('data-callback')].call(null, response);
+            var options = form.prop('autoAjaxOptions');
 
-            if ( 'error' in response || 'message' in response || 'callback' in response )
-            {
-                if ( response.type == 'modal' )
-                {
-                    autoAjax.showModal(response);
-                } else {
-                    autoAjax.setMessage(form , response.message, 'message' in response ? 'success' : 'error');
+            //Set ajax status as done
+            options.status = 'ready';
 
-                    if ( 'callback' in response )
-                        eval(response.callback);
-                }
-
-                return true;
-            } else if ( 'redirect' in response )
-            {
-                if ( response.redirect == window.location.href )
-                    return window.location.reload();
-
-                window.location.href = response.redirect;
-
-                return true;
+            //On success response
+            if ( response.status == 200 ) {
+                options.events.success(response.responseJSON||response.responseText, response, form);
+                options.globalEvents.success(response.responseJSON||response.responseText, response, form);
             }
 
-            return false;
+            //On validation error
+            else if ( response.status == 422 || response.status == 403 ) {
+                options.events.validationError(response.responseJSON||response.responseText, response, form);
+                options.globalEvents.validationError(response.responseJSON||response.responseText, response, form);
+            }
+
+            //Other error
+            else {
+                options.events.error(response.responseJSON||response.responseText, response, form);
+                options.globalEvents.error(response.responseJSON||response.responseText, response, form);
+            }
         },
-        unknownError()
-        {
-            autoAjax.showModal({
-                message : autoAjax.errorMessage
-            });
-        },
-    }
+    },
 
-    $.fn.autoAjax = function(options){
-        //Rewrite default options
-        for ( var key in options||{} ) {
-            autoAjax.options[key] = options[key];
-        }
-
-        return $(this).each(function(){
-            autoAjax.bindRow.call(this);
-            autoAjax.bindDatepickers.call(this);
-
-            if ( this._autoAjax === true )
-                return;
-
-            this._autoAjax = true;
-
-            var stop = false;
-
-            /*
-             * After submit form
-             */
-            $(this).submit(function(){
-                if ( stop == true )
-                    return false;
-
-                stop = true;
-
-                var form = $(this);
-
-                autoAjax.resetErrors(form);
-
-                var submit = form.find('*[type="submit"]');
-
-                if ( submit.next().hasClass('hidden') && submit.next().is('button') )
-                {
-                    submit.toggleClass('hidden');
-                    submit.next().toggleClass('hidden');
-                }
-
-                form.ajaxSubmit({
-                  url: form.attr('data-action'),
-                  success: function(response, type, request){
-                    autoAjax.resetErrors(form);
-
-                    stop = false;
-
-                    if ( form.hasClass('autoReset') && !('error' in response) )
-                        form.find('input, select, textarea').not('input[name="_token"], input[type="submit"], input[type="hidden"]').val('');
-
-                    autoAjax.ajaxResponse(response, form);
-                  },
-                  error: function(response){
-                    autoAjax.resetErrors(form);
-
-                    stop = false;
-
-                    if ( response.status == 422 || response.status == 403 ){
-
-                        var obj = response.responseJSON;
-
-                        if ( response.status == 422 )
-                        {
-                            //Laravel 5.5 provides validation errors in errors object.
-                            if ( 'errors' in obj && !('length' in obj.errors) )
-                                obj = obj.errors;
-
-                            for ( var key in obj )
-                            {
-                                var message = $.isArray(obj[key]) ? obj[key][0] : obj[key];
-
-                                form.find('input[name="'+key+'"], select[name="'+key+'"], textarea[name="'+key+'"]')
-                                    .after('<span class="help-block error">'+message+'</span>')
-                                    .first().parent()
-                                    .addClass('has-error')
-                                    .keyup(function(e){
-                                        if ( e.keyCode == 13 )
-                                            return;
-
-                                        $(this).removeClass('has-error');
-                                        $(this).find('span.error').remove();
-                                        $(this).find('.error').removeClass('error');
-                                    });
-                            }
-
-                            if ( ! form.hasClass('noErrorMessage') )
-                                autoAjax.setMessage(form, autoAjax.options.messages.validationError, 'error');
-                        }
-                    } else {
-                        autoAjax.setMessage(form, obj ? obj.message||autoAjax.errorMessage : autoAjax.options.errorMessage, 'error');
+    /*
+     * Create installable vuejs package
+     */
+    install(Vue, options){
+        Vue.directive('autoAjax', {
+            bind(el, binding, vnode) {
+                $(el).autoAjax({
+                    events : {
+                        success : vnode.data.on.success||(() => {}),
+                        error : vnode.data.on.error||(() => {}),
+                        validationError : vnode.data.on.validationError||(() => {}),
                     }
-                  }
                 });
+            },
+        })
+    },
+}
 
-                return false;
-            });
+/**
+ * Install package as jQuery plugin
+ */
+$.fn.autoAjax = function(options){
+    return $(this).each(function(){
+        //If form has been initialized already
+        if ( this.autoAjaxOptions )
+            return;
+
+        //Bind ajax options into exact form
+        this.autoAjaxOptions = Object.assign(autoAjax.options, options, {
+            status : 'ready',
         });
-    };
-})($);
+
+        //Bind given row data and datepicker
+        autoAjax.core.bindRow.call(this);
+        autoAjax.core.bindDatepickers.call(this);
+
+        /*
+         * After submit form
+         */
+        $(this).submit(function(){
+            //Disable send form twice
+            if ( this.autoAjaxOptions.status === 'sending' )
+                return false;
+
+            this.autoAjaxOptions.status = 'sending';
+
+            var form = $(this);
+
+            autoAjax.core.resetErrors(form);
+
+            var submit = form.find('*[type="submit"]');
+
+            form.ajaxSubmit({
+              url: form.attr('data-action'),
+              success: (data, type, response) => autoAjax.core.ajaxResponse(response, form),
+              error: response => autoAjax.core.ajaxResponse(response, form),
+            });
+
+            return false;
+        });
+    });
+};
+
+module.exports = autoAjax;
