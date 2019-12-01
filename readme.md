@@ -129,7 +129,7 @@ $(function(){
 </script>
 ```
 
-## AutoAjax Options and properties
+# AutoAjax Options
 AutoAjax options can be applied in VueJs directive `v-autoAjax="myOptions"` or in jQuery initialization autoAjax on form element `$('#myForm').autoAjax({ ... })`
 
 ```js
