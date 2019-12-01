@@ -14,7 +14,7 @@ This package sends AJAX requests from basic form inputs and manages Laravel ajax
 <script src="js/autoAjax.min.js"></script>
 ```
 
-## VueJs Integration
+# VueJs Integration
 ```js
 var autoAjax = require('autoajax');
 
@@ -93,7 +93,7 @@ This is list of available form events. Need to be placed in <form> element.
 `@validation="myValidationErrorEvent"` or `@onValidation="myValidationErrorEvent"`
 
 
-## Plain JavaScript Integration
+# Plain JavaScript Integration
 
 ### Initializing autoAjax form instance in plain JS
 If you want initialize autoAjax form, you need use `autoAjax` class on form element.
