@@ -49,7 +49,16 @@ export default {
 </script>
 ```
 
+### VueJS Directives
+#### Form initialization
+`<form v-autoAjax></form>`
+
+#### Reset form on success response
+`<form v-autoAjax v-autoReset></form>`
+
 ### VueJS Events
+This is list of available form events. Need to be placed in <form> element.
+
 #### Receiving success response data on **HTTP 200**
 `@success="mySuccessEvent"` or `@onSuccess="mySuccessEvent"`
 
