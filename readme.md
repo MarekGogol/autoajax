@@ -79,7 +79,7 @@ For custom form options you can use directive with options parameter like:
 ```
 
 ### VueJs Events
-This is list of available form events. Need to be placed in <form> element.
+This is list of available form events. Need to be placed in form element.
 
 
 #### On every form submit
