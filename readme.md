@@ -135,13 +135,18 @@ AutoAjax options can be applied in VueJs directive `v-autoAjax="myOptions"` or i
 ```js
 var options = {
     //Automaticaly add validation errors to each input
-    autoValidationErrors : true,
+    validationInputErrors : true,
     
+    //Automaticaly add validation error message into form message element
+    validationMessage : true,
+    
+    //All available messages
     messages : {
         error : 'Something went wrong, please try again later.',
         validation: 'Please fill all required fields.',
     },
     
+    //All availabe form events
     events : {
         onSubmit() => {},
         onSuccess() => {},
