@@ -74,7 +74,9 @@ For custom form options you can use directive with options parameter like:
 ```
 
 #### Automatically reset input values on success response
-`<form v-autoAjax v-autoReset></form>`
+```html
+<form v-autoAjax v-autoReset></form>
+```
 
 ### VueJs Events
 This is list of available form events. Need to be placed in <form> element.
