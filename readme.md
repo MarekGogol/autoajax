@@ -14,8 +14,7 @@ This package sends AJAX requests from basic form inputs and manages Laravel ajax
 <script src="js/autoAjax.min.js"></script>
 ```
 
-## VueJS Integration
-
+### VueJS Installation
 ```js
 var autoAjax = require('autoajax');
 
@@ -26,7 +25,7 @@ Vue.use(autoAjax);
 If you want initialize autoAjax form in VueJS component, you need use `v-autoAjax` directive in form element.
 ```html
 <template>
-    <form method="post" action="/contact" v-autoAjax @onSuccess="successEvent" @onValidation="validationEvent" @onError="errorEvent">
+    <form method="post" action="/contact" v-autoAjax="formOptions" @onSuccess="successEvent" @onValidation="validationEvent" @onError="errorEvent">
         <div class="form-group">
             <input type="text" name="email">
         </div>
@@ -41,7 +40,11 @@ If you want initialize autoAjax form in VueJS component, you need use `v-autoAja
 
 <script>
 export default {
-    ...
+    data: {
+        formOptions : {
+            //...
+        }
+    },
   
     methods: {
         successEvent(data, response) {
@@ -78,9 +81,9 @@ This is list of available form events. Need to be placed in <form> element.
 `@validation="myValidationErrorEvent"` or `@onValidation="myValidationErrorEvent"`
 
 
-### PlainJS Integration
+## Plain JavaScript Integration
 
-## Initializing autoAjax form instance
+### Initializing autoAjax form instance in plain JS
 If you want initialize autoAjax form, you need use `autoAjax` class on form element.
 ```html
 <form method="post" action="/contact" class="autoAjax">
@@ -94,4 +97,40 @@ If you want initialize autoAjax form, you need use `autoAjax` class on form elem
         <button type="submit">submit form</button>
     </div>
 </form>
+
+<script>
+$(function(){
+    var options = {
+        //...
+        events : {
+            onSuccess : function(data, response){},
+            onError : function(data, response){},
+            onValidation : function(data, response){},
+        },
+    };
+    
+    $('form.autoAjax').autoAjax(options)
+});
+</script>
+```
+
+## AutoAjax Options
+AutoAjax options can be applied in VueJs directive `v-autoAjax="myOptionsFromData"` or in jQuery initialization autoAjax on form element `$('#myForm').autoAjax({ ... })`
+
+```js
+var options = {
+    //Automaticaly add validation errors to each input
+    autoValidationErrors : true,
+    
+    messages : {
+        error : 'Something went wrong, please try again later.',
+        validation: 'Please fill all required fields.',
+    },
+    
+    events : {
+        onSuccess() => {},
+        onError() => {},
+        onValidation() => {},
+    }
+}
 ```
