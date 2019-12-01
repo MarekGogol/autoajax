@@ -129,6 +129,13 @@ $(function(){
 </script>
 ```
 
+#### Available classes for HTML forms
+`autoAjax` - initialize autoAjax instance
+
+`autoReset` - resets form values after success message
+
+`noValidationMessage` - disables validation alert message.
+
 # AutoAjax Options
 AutoAjax options can be applied in VueJs directive `v-autoAjax="myOptions"` or in jQuery initialization autoAjax on form element `$('#myForm').autoAjax({ ... })`
 
