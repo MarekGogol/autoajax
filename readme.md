@@ -14,14 +14,14 @@ This package sends AJAX requests from basic form inputs and manages Laravel ajax
 <script src="js/autoAjax.min.js"></script>
 ```
 
-### VueJS Installation
+## VueJs Integration
 ```js
 var autoAjax = require('autoajax');
 
 Vue.use(autoAjax);
 ```
 
-### Initializing autoAjax in VueJS
+### Initializing autoAjax form in VueJS
 If you want initialize autoAjax form in VueJS component, you need use `v-autoAjax` directive in form element.
 ```html
 <template>
@@ -61,14 +61,14 @@ export default {
 </script>
 ```
 
-### VueJS Directives
+### VueJs directives
 #### Form initialization
 `<form v-autoAjax></form>`
 
 #### Reset form on success response
 `<form v-autoAjax v-autoReset></form>`
 
-### VueJS Events
+### VueJs Events
 This is list of available form events. Need to be placed in <form> element.
 
 #### Receiving success response data on **HTTP 200**
