@@ -1,0 +1,1 @@
+# AutoAjax form for Laravel/Vuejs/jQuery apps
