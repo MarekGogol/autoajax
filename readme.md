@@ -63,9 +63,17 @@ export default {
 
 ### VueJs directives
 #### Form initialization
-`<form v-autoAjax></form>`
+Basic autoAjax form initialization you can bind with:
+```html
+<form v-autoAjax></form>
+```
 
-#### Reset form on success response
+For custom form options you can use directive with options parameter like:
+```html
+<form v-autoAjax="myFormOptions"></form>
+```
+
+#### Automatically reset input values on success response
 `<form v-autoAjax v-autoReset></form>`
 
 ### VueJs Events
