@@ -79,6 +79,10 @@ For custom form options you can use directive with options parameter like:
 ### VueJs Events
 This is list of available form events. Need to be placed in <form> element.
 
+
+#### On every form submit
+`@submit="mySubmitEvent"` or `@onSubmit="mySubmitEvent"`
+
 #### Receiving success response data on **HTTP 200**
 `@success="mySuccessEvent"` or `@onSuccess="mySuccessEvent"`
 
@@ -111,6 +115,7 @@ $(function(){
     var options = {
         //...
         events : {
+            onSubmit : function(data, response){},
             onSuccess : function(data, response){},
             onError : function(data, response){},
             onValidation : function(data, response){},
@@ -136,6 +141,7 @@ var options = {
     },
     
     events : {
+        onSubmit() => {},
         onSuccess() => {},
         onError() => {},
         onValidation() => {},
