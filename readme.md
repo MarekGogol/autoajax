@@ -19,7 +19,7 @@ This package builds and sends ajax requests from `<form>` inputs. Then automatic
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/3.50/jquery.form.min.js"></script>
 
 <!-- autoAjax.min.js -->
-<script src="js/autoAjax.min.js"></script>
+<script src="dist/autoAjax.min.js"></script>
 ```
 
 # VueJs Integration
