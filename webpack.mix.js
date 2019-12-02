@@ -13,5 +13,5 @@ const mix = require('laravel-mix');
 
 //Only autoAjax
 mix.js([
-    'src/autoAjax.js',
+    'src/dist.js',
 ], 'dist/autoAjax.min.js');
