@@ -96,7 +96,7 @@ This is list of available form events. Need to be placed in form element.
 #### Receiving success response data on **HTTP 200**
 `@success="mySuccessEvent"` or `@onSuccess="mySuccessEvent"`
 
-#### Receiving error response data on **HTTP 500**
+#### Receiving error response data on **HTTP 500** and other error codes.
 `@error="myErrorEvent"` or `@onError="myErrorEvent"`
 
 #### On (laravel) validation error **HTTP 422** or **HTTP 430** error code
