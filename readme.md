@@ -1,13 +1,13 @@
-# AutoAjax form for Laravel/Vuejs/jQuery apps
-This package sends AJAX requests from basic form inputs and manages Laravel ajax validation.
+# AutoAjax.js
+This package builds and sends ajax requests from `<form>` inputs. Then automatically receives upcoming validated request and provide automatical error messages management with all events required for Ajax management. Suitable for **Laravel** or plain **PHP**.
+
+**This is part of package** for implementation in **JavaScript / VueJs** application side. More for PHP / Laravel side of this package on [autoAjax](https://github.com/crudadmin/autoajax)
 
 ## Features
 - Automatically builds request data from `<form>` input elements.
 - Handles Laravel validation and automatically binds error messages to each input in form.
 - VueJs integration
 - PlainJs integration
-
-**This is part** of package for implementation in **JavaScript / VueJs** side. More for **PHP / Laravel** side of this package on [autoAjax](https://github.com/crudadmin/autoajax)
 
 ### Installation via NPM
 `npm i autoajax --save`
@@ -96,7 +96,7 @@ This is list of available form events. Need to be placed in form element.
 #### Receiving success response data on **HTTP 200**
 `@success="mySuccessEvent"` or `@onSuccess="mySuccessEvent"`
 
-#### Receiving error response data on **HTTP 500**
+#### Receiving error response data on **HTTP 500** and other error codes.
 `@error="myErrorEvent"` or `@onError="myErrorEvent"`
 
 #### On (laravel) validation error **HTTP 422** or **HTTP 430** error code
