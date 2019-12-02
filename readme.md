@@ -1,5 +1,5 @@
-# AutoAjax form for Laravel/Vuejs/jQuery apps
-This package sends AJAX requests from basic form inputs and manages Laravel ajax validation.
+# AutoAjax.js
+This package builds and sends ajax requests from `<form>` inputs. Then automatically receives upcoming validated request and provide automatical error messages management with all events required for Ajax management. Suitable for **Laravel** or plain **PHP**.
 
 ## Features
 - Automatically builds request data from `<form>` input elements.
