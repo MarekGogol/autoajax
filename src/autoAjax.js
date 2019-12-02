@@ -1,6 +1,4 @@
-require('jquery-form/jquery.form.js');
-
-const autoAjax = {
+var autoAjax = {
     options : {
         //Auto reset form on success
         autoReset : false,
@@ -373,4 +371,4 @@ $.fn.autoAjax = function(options){
     });
 };
 
-module.exports = autoAjax;
+export default autoAjax;

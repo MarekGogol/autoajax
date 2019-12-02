@@ -4,11 +4,16 @@
   "description": "AutoAjax form library for sending forms and automaticall laravel validation.",
   "main": "autoajax.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js"
   },
   "author": "Marek Gogoľ <info@marekgogol.sk>",
   "license": "MIT",
   "dependencies": {
     "jquery-form": "^3.50.0"
+  },
+  "devDependencies": {
+    "cross-env": "^5.1",
+    "laravel-mix": "^4.0.7",
+    "vue-template-compiler": "^2.6.10"
   }
 }
