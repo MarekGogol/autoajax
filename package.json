@@ -1,12 +1,12 @@
 {
   "name": "autoajax",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "AutoAjax form library for sending forms and automaticall laravel validation.",
   "main": "autoajax.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Marek Gogoľ <info@marekgogol.sk>",
   "license": "ISC",
   "dependencies": {
     "jquery-form": "^3.50.0"
