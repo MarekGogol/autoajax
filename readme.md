@@ -7,6 +7,7 @@ This package sends AJAX requests from basic form inputs and manages Laravel ajax
 - VueJs integration
 - PlainJs integration
 
+**This is part** of package for application in **JavaScript / VueJs**. More for **PHP / Laravel** part of this package on [autoAjax](https://github.com/crudadmin/autoajax)
 
 ### Installation via NPM
 `npm i autoajax --save`
