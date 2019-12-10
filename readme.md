@@ -170,7 +170,7 @@ var options = {
     },
     
     //Generate error message for input element
-    getErrorMessageElement(message) {
+    getErrorMessageElement(message, key, form) {
         return '<span class="error-message error">'+message+'</span>';
     }
 }
