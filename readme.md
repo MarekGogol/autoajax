@@ -160,14 +160,18 @@ var options = {
         error : 'Something went wrong, please try again later.',
         validation: 'Please fill all required fields.',
     },
+       
+    //Event on every form submit
+    onSubmit() => {},
     
-    //All availabe form events
-    events : {
-        onSubmit() => {},
-        onSuccess() => {},
-        onError() => {},
-        onValidation() => {},
-    },
+    //Event on success response (HTTP 200)
+    onSuccess() => {},
+    
+    //Event on error response
+    onError() => {},
+    
+    //Event on validation response
+    onValidation() => {},
     
     //Generate error message for input element
     getErrorMessageElement(message, key, form) {
