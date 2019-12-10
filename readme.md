@@ -124,12 +124,10 @@ If you want initialize autoAjax form, you need use `autoAjax` class on form elem
 $(function(){
     var options = {
         //...
-        events : {
-            onSubmit : function(data, response){},
-            onSuccess : function(data, response){},
-            onError : function(data, response){},
-            onValidation : function(data, response){},
-        },
+        onSubmit : function(data, response){},
+        onSuccess : function(data, response){},
+        onError : function(data, response){},
+        onValidation : function(data, response){},
     };
     
     $('form.autoAjax').autoAjax(options)
@@ -145,7 +143,7 @@ $(function(){
 `noValidationMessage` - disables validation alert message.
 
 # AutoAjax Options
-AutoAjax options can be applied in VueJs directive `v-autoAjax="myOptions"` or in jQuery initialization autoAjax on form element `$('#myForm').autoAjax({ ... })`
+AutoAjax options can be applied in VueJs directive `v-autoAjax="myOptions"` or in jQuery initialization autoAjax on form element `$('#myForm').autoAjax({ ... })`. This options will be applied only on selected form instance.
 
 ```js
 var options = {
@@ -178,4 +176,23 @@ var options = {
         return '<span class="error-message error">'+message+'</span>';
     }
 }
+```
+
+# AutoAjax global options
+You can mutate global AutoAjax options for all form instances.
+```js
+autoAjax.setOptions({
+    //Other settings from autoAjax options
+    //..
+    
+    //Custom message
+    messages: {
+        error : 'My custom global error message',
+    },
+    
+    //Custom error message element
+    getErrorMessageElement(message){
+        return '<span class="my-custom-error-message error">'+message+'</span>';
+    }
+});
 ```
