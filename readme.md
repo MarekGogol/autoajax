@@ -167,6 +167,11 @@ var options = {
         onSuccess() => {},
         onError() => {},
         onValidation() => {},
+    },
+    
+    //Generate error message for input element
+    getErrorMessageElement(message) {
+        return '<span class="error-message error">'+message+'</span>';
     }
 }
 ```
