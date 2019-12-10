@@ -150,7 +150,11 @@ var options = {
     //Automaticaly add validation errors to each input
     validationInputErrors : true,
     
+    //General success/error/validation form message
+    messageAlert : true,
+    
     //Automaticaly add validation error message into form message element
+    //Message alert need to be true
     validationMessage : true,
     
     //Available selectors and classes
@@ -158,7 +162,7 @@ var options = {
         messageSelector: '.alert',
         messageSuccessClass : '.alert-success',
         messageErrorClass : '.alert-danger',
-        inputParentValidationClass : '.has-error',
+        inputWrapperErrorClass : '.has-error',
     },
     
     //All available messages
