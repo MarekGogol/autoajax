@@ -153,6 +153,14 @@ var options = {
     //Automaticaly add validation error message into form message element
     validationMessage : true,
     
+    //Available selectors and classes
+    selectors : {
+        messageSelector: '.alert',
+        messageSuccessClass : '.alert-success',
+        messageErrorClass : '.alert-danger',
+        inputParentValidationClass : '.has-error',
+    },
+    
     //All available messages
     messages : {
         error : 'Something went wrong, please try again later.',
