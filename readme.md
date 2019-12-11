@@ -1,6 +1,8 @@
 # AutoAjax.js
 This package builds and sends ajax requests from `<form>` inputs. Then automatically receives upcoming validated request and provide automatical error messages management with all events required for Ajax management. Suitable for **Laravel** or plain **PHP**.
 
+![Example](/dist/example2x.gif)
+
 **This is part of package** for implementation in **JavaScript / VueJs** application side. More for PHP / Laravel side of this package on [autoAjax](https://github.com/crudadmin/autoajax)
 
 ## Features
@@ -12,7 +14,7 @@ This package builds and sends ajax requests from `<form>` inputs. Then automatic
 ### Installation via NPM
 `npm i autoajax --save`
 
-### Basic installation
+### Or basic installation
 ```html
 <!-- jQuery and jQuery form -->
 <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
@@ -115,9 +117,9 @@ This is list of available form events. Need to be placed in form element.
 # Plain JavaScript Integration
 
 ### Initializing autoAjax form instance in plain JS
-If you want initialize autoAjax form, you need use `autoAjax` class on form element.
+If you want initialize autoAjax form, you initialize `autoAjax` method on your form element.
 ```html
-<form method="post" action="/contact" class="autoAjax">
+<form method="post" action="/contact" class="myAutoAjaxform">
     <div class="form-group">
         <input type="text" name="email">
     </div>
@@ -132,7 +134,9 @@ If you want initialize autoAjax form, you need use `autoAjax` class on form elem
 <script>
 $(function(){
     var options = {
-        //...
+        //Resets for on success response
+        autoReset : true,
+    
         onSubmit : function(data, response){},
         onSuccess : function(data, response){},
         onError : function(data, response){},
@@ -142,34 +146,35 @@ $(function(){
         //Can be used also form without "on" at the beggining
         // submit : function(data, response){...
         // success : function(data, response){...
+    
+        //and any other settings from autoAjax options...
     };
     
-    $('form.autoAjax').autoAjax(options)
+    $('form.myAutoAjaxform').autoAjax(options)
 });
 </script>
 ```
 
 #### Available classes for HTML forms
-`autoAjax` - initialize autoAjax instance
-
 `autoReset` - resets form values after success message
-
-`noValidationMessage` - disables validation alert message.
 
 # AutoAjax Options
 AutoAjax options can be applied in VueJs directive `v-autoAjax="myOptions"` or in jQuery initialization autoAjax on form element `$('#myForm').autoAjax({ ... })`. This options will be applied only on selected form instance.
 
 ```js
 var options = {
-    //Automaticaly add validation errors to each input
-    validationInputErrors : true,
+    //Automatically resets all form inputs to default values after success response
+    autoReset : false,
+    
+    //Automaticaly add validation error messages after each bad filled input
+    showInputErrors : true,
     
     //General success/error/validation form message
-    messageAlert : true,
+    showMessage : true,
     
-    //Automaticaly add validation error message into form message element
-    //Message alert need to be true
-    validationMessage : true,
+    //Automaticaly add global validation error message into form message element
+    //showMessage needs to be true
+    showValidationMessage : true,
     
     //Available selectors and classes
     selectors : {
