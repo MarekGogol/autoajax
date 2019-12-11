@@ -421,6 +421,7 @@ var autoAjax = {
                         success : on.success||on.onSuccess,
                         error : on.error||on.onError,
                         validation : on.validation||on.onValidation,
+                        complete : on.complete||on.onComplete,
                     }, options);
 
                 $(el).autoAjax(mergedOptions);
