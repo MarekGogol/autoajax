@@ -166,15 +166,15 @@ var options = {
     //Automatically resets all form inputs to default values after success response
     autoReset : false,
     
-    //Automaticaly add validation errors to each input
-    validationInputErrors : true,
+    //Automaticaly add validation error messages after each bad filled input
+    showInputErrors : true,
     
     //General success/error/validation form message
-    messageAlert : true,
+    showMessage : true,
     
-    //Automaticaly add validation error message into form message element
-    //Message alert need to be true
-    validationMessage : true,
+    //Automaticaly add global validation error message into form message element
+    //showMessage needs to be true
+    showValidationMessage : true,
     
     //Available selectors and classes
     selectors : {
