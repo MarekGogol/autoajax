@@ -33,7 +33,7 @@ Vue.use(autoAjax);
 If you want initialize autoAjax form in VueJS component, you need use `v-autoAjax` directive in form element.
 ```html
 <template>
-    <form method="post" action="/contact" v-autoAjax="formOptions" @onSuccess="successEvent" @onValidation="validationEvent" @onError="errorEvent">
+    <form method="post" action="/contact" v-autoAjax="formOptions" @onSubmit="onSubmit" @onSuccess="successEvent" @onValidation="validationEvent" @onError="errorEvent" @onComplete="onComplete">
         <div class="form-group">
             <input type="text" name="email">
         </div>
@@ -55,6 +55,9 @@ export default {
     },
   
     methods: {
+        onSubmit(form) {
+            console.log(form);
+        },
         successEvent(data, response) {
             console.log(data, response);
         },
@@ -62,6 +65,9 @@ export default {
             console.log(data, response);
         },
         validationEvent(data, response) {
+            console.log(data, response);
+        },
+        onComplete(data, response) {
             console.log(data, response);
         }
     }
@@ -102,6 +108,9 @@ This is list of available form events. Need to be placed in form element.
 #### On (laravel) validation error **HTTP 422** or **HTTP 430** error code
 `@validation="myValidationErrorEvent"` or `@onValidation="myValidationErrorEvent"`
 
+#### On all completed HTTP responses with any code
+`@complete="myCompleteEvent"` or `@onComplete="myCompleteEvent"`
+
 
 # Plain JavaScript Integration
 
@@ -128,6 +137,11 @@ $(function(){
         onSuccess : function(data, response){},
         onError : function(data, response){},
         onValidation : function(data, response){},
+        onComplete : function(data, response){},
+    
+        //Can be used also form without "on" at the beggining
+        // submit : function(data, response){...
+        // success : function(data, response){...
     };
     
     $('form.autoAjax').autoAjax(options)
@@ -182,6 +196,9 @@ var options = {
     
     //Event on validation response
     onValidation() => {},
+    
+    //On all completed responses codes
+    onComplete() => {},
     
     //Generate error message for input element
     getErrorMessageElement(message, key, form) {
