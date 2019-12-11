@@ -391,6 +391,13 @@ var autoAjax = {
                     options.globalEvents.error
                 ], finalResponse);
             }
+
+            //On complete request
+            this.fireEventsOn([
+                options.complete,
+                options.onComplete,
+                options.globalEvents.complete
+            ], finalResponse);
         },
     },
 
