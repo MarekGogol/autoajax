@@ -186,7 +186,16 @@ var options = {
     //Generate error message for input element
     getErrorMessageElement(message, key, form) {
         return '<span class="error-message error">'+message+'</span>';
-    }
+    },
+    
+    //Add validation error message after this element
+    addErrorMessageAfterElement(input){
+        //You can modify, where should be placed validation error message for each input
+        //If you want place validation after input parent, you can do something like:
+        //return input.parent();
+        
+        return input;
+    },
 }
 ```
 
