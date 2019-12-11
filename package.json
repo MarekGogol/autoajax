@@ -9,7 +9,8 @@
   "author": "Marek Gogoľ <info@marekgogol.sk>",
   "license": "MIT",
   "dependencies": {
-    "jquery-form": "^3.50.0"
+    "jquery-form": "^3.50.0",
+    "lodash.clonedeep": "^4.5.0"
   },
   "devDependencies": {
     "cross-env": "^5.1",

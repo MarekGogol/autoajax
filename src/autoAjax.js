@@ -1,3 +1,5 @@
+const cloneDeep = require('lodash.clonedeep');
+
 var autoAjax = {
     options : {
         //Auto reset form on success
@@ -6,8 +8,19 @@ var autoAjax = {
         //Automaticaly add validation error messages into each bad filled input
         validationInputErrors : true,
 
+        //General success/error/validation form message
+        messageAlert : true,
+
         //Automatically bind validation message
         validationMessage : true,
+
+        //Available selectors and classes
+        selectors : {
+            messageSelector: '.alert',
+            messageSuccessClass : '.alert-success',
+            messageErrorClass : '.alert-danger',
+            inputWrapperErrorClass : '.has-error',
+        },
 
         //Global messages
         messages : {
@@ -15,18 +28,27 @@ var autoAjax = {
             validation: 'Please fill all required fields.',
         },
 
-        //User events
-        events: {
-            submit(form){ },
-            success(data, response, form){ },
-            error(data, response, form){ },
-            validation(data, response, form){ },
+        submit(form){ },
+        success(data, response, form){ },
+        error(data, response, form){ },
+        validation(data, response, form){ },
+
+        //Build validation error message
+        getErrorMessageElement(message, key, form){
+            return '<span class="help-block error">'+message+'</span>';
+        },
+
+        //Add validation error message after this element
+        addErrorMessageAfterElement(input){
+            //You can modify, where should be placed validation error message for each onput
+            return input;
         },
 
         //Global callback events for every form, such as validation, error handling etc...
         globalEvents : {
             success(data, response, form){
-                var canResetForm = form.hasClass('autoReset') || autoAjax.core.getFormOptions(form).autoReset === true;
+                var options = autoAjax.core.getFormOptions(form),
+                    canResetForm = form.hasClass('autoReset') || options.autoReset === true;
 
                 //Reset form on success message if has autoReset class
                 if ( canResetForm && !('error' in response) ) {
@@ -48,7 +70,10 @@ var autoAjax = {
                     if ( data.type == 'modal' ) {
                         autoAjax.core.showModal(data);
                     } else {
-                        autoAjax.core.setMessage(form , data.message, 'message' in data ? 'success' : 'error');
+                        //Show message alert
+                        if ( options.messageAlert === true ) {
+                            autoAjax.core.setMessage(form, data.message, 'message' in data ? 'success' : 'error');
+                        }
 
                         if ( 'callback' in data )
                             eval(data.callback);
@@ -67,9 +92,12 @@ var autoAjax = {
                 }
             },
             error(data, response, form){
-                var obj = response.responseJSON;
+                var obj = response.responseJSON,
+                    options = autoAjax.core.getFormOptions(form);
 
-                autoAjax.core.setMessage(form, obj ? obj.message||autoAjax.options.messages.error : autoAjax.options.messages.error, 'error');
+                if ( options.messageAlert === true ) {
+                    autoAjax.core.setMessage(form, obj ? obj.message||options.messages.error : options.messages.error, 'error');
+                }
             },
             validation(data, response, form){
                 var obj = response.responseJSON,
@@ -87,26 +115,17 @@ var autoAjax = {
                         {
                             var message = $.isArray(obj[key]) ? obj[key][0] : obj[key];
 
-                            form.find('input[name="'+key+'"], select[name="'+key+'"], textarea[name="'+key+'"]')
-                                .after('<span class="help-block error">'+message+'</span>')
-                                .first().parent().addClass('has-error')
-                                .keyup(function(e){
-                                    if ( e.keyCode == 13 ) {
-                                        return;
-                                    }
-
-                                    $(this).removeClass('has-error');
-                                    $(this).find('span.error.help-block').remove();
-                                });
+                            autoAjax.core.setErrorMessage(form, key, message)
                         }
                     }
 
-                    if ( options.validationMessage === true && !form.hasClass('noValidationMessage') ) {
-                        autoAjax.core.setMessage(form, autoAjax.options.messages.validation, 'error');
+                    //Show validation message alert
+                    if ( options.messageAlert === true && options.validationMessage === true ) {
+                        autoAjax.core.setMessage(form, options.messages.validation, 'error');
                     }
                 }
             },
-        }
+        },
     },
 
     core : {
@@ -114,7 +133,7 @@ var autoAjax = {
          * Return form options
          */
         getFormOptions(form){
-            var options = form[0].autoAjaxOptions;
+            var options = (form[0]||form).autoAjaxOptions;
 
             return options||{};
         },
@@ -216,10 +235,36 @@ var autoAjax = {
          * @param  element  form
          */
         resetErrors : function(form){
-            form.find('.message, .alert').html('').hide();
-            form.find('span.error.help-block').remove();
-            form.find('.has-error').removeClass('has-error');
-            form.find('input.error, select.error, textarea.error').removeClass('error');
+            var options = autoAjax.core.getFormOptions(form),
+                successClass = autoAjax.core.getClass('messageSuccessClass', form, true),
+                errorClass = autoAjax.core.getClass('messageErrorClass', form, true);
+
+            //Remove added error messages
+            if ( form[0]._addedErrorMessages ) {
+                for ( var i = 0; i < form[0]._addedErrorMessages.length; i++ ) {
+                    form[0]._addedErrorMessages[i].remove();
+                }
+            }
+
+            //Remove and hite alert message class
+            form.find(options.selectors.messageSelector)
+                .removeClass(successClass+' '+errorClass)
+                .html('')
+                .hide();
+
+            //Remove input wrapper class
+            form.find(autoAjax.core.getClass('inputWrapperErrorClass', form))
+                .removeClass(autoAjax.core.getClass('inputWrapperErrorClass', form, true));
+        },
+        getClass(key, form, onlyString){
+            var options = autoAjax.core.getFormOptions(form),
+                selector = options.selectors[key];
+
+            if ( onlyString === true ) {
+                selector = selector.replace(/\./g, '');
+            }
+
+            return selector;
         },
         /**
          * Set form message
@@ -229,13 +274,70 @@ var autoAjax = {
          * @param  string  type
          */
         setMessage : function(form, message, type){
-            form.parent()
-                .find('.alert')
-                .removeClass('alert-danger alert-success')
-                .addClass(type == 'error' ? 'alert-danger' : 'alert-success')
-                .html(message)
-                .show();
+            var successClass = autoAjax.core.getClass('messageSuccessClass', form, true),
+                errorClass = autoAjax.core.getClass('messageErrorClass', form, true);
+
+            if ( message ) {
+                form.parent()
+                    .find(autoAjax.core.getFormOptions(form).selectors.messageSelector)
+                    .removeClass(successClass)
+                    .removeClass(errorClass)
+                    .addClass(type == 'error' ? errorClass : successClass)
+                    .html(message)
+                    .show();
+            }
         },
+        /*
+         * Set input error message
+         */
+        setErrorMessage : function(form, key, message){
+            var options = autoAjax.core.getFormOptions(form),
+                errorElement = options.getErrorMessageElement(message, key, form),
+                errorInputs = form.find('input[name="'+key+'"], select[name="'+key+'"], textarea[name="'+key+'"]')
+
+            //Add error message element after imput
+            errorInputs.each(function(){
+                var addAfter = options.addErrorMessageAfterElement( $(this) );
+
+                addAfter.after(errorElement);
+
+                //If input does not has bffer
+                if ( ! this._addedErrorMesageIntoInput ) {
+                    this._addedErrorMesageIntoInput = [];
+                }
+
+                //Add error message into buffer of actual input
+                this._addedErrorMesageIntoInput.push(addAfter.next()[0]);
+
+                //If form does not have stack with error messages
+                if ( ! form[0]._addedErrorMessages ) {
+                    form[0]._addedErrorMessages = [];
+                }
+
+                form[0]._addedErrorMessages.push(addAfter.next()[0]);
+            });
+
+            //Add error class on input parent
+            errorInputs
+                //If input changes, remove errors
+                .on('keyup change', function(e){
+                    if ( e.keyCode == 13 ) {
+                        return;
+                    }
+
+                    //Remove all input messages
+                    if ( this._addedErrorMesageIntoInput ) {
+                        for ( var i = 0; i < this._addedErrorMesageIntoInput.length; i++ ) {
+                            this._addedErrorMesageIntoInput[i].remove();
+                        }
+                    }
+
+                    $(this).parent().removeClass(autoAjax.core.getClass('inputWrapperErrorClass', form, true));
+                })
+
+                //Add error class on input wrapper
+                .parent().addClass(autoAjax.core.getClass('inputWrapperErrorClass', form, true))
+            },
         /*
          * Show modal with callback
          */
@@ -263,8 +365,8 @@ var autoAjax = {
             //On success response
             if ( response.status == 200 ) {
                 this.fireEventsOn([
-                    options.events.success,
-                    options.events.onSuccess,
+                    options.success,
+                    options.onSuccess,
                     options.globalEvents.success
                 ], finalResponse);
             }
@@ -272,8 +374,8 @@ var autoAjax = {
             //On validation error
             else if ( response.status == 422 || response.status == 403 ) {
                 this.fireEventsOn([
-                    options.events.validation,
-                    options.events.onValidation,
+                    options.validation,
+                    options.onValidation,
                     options.globalEvents.validation
                 ], finalResponse);
             }
@@ -281,12 +383,18 @@ var autoAjax = {
             //Other error
             else {
                 this.fireEventsOn([
-                    options.events.error,
-                    options.events.onError,
+                    options.error,
+                    options.onError,
                     options.globalEvents.error
                 ], finalResponse);
             }
         },
+    },
+
+    setOptions(options){
+        autoAjax.core.mergeOptions(autoAjax.options, options);
+
+        return this;
     },
 
     /*
@@ -299,12 +407,10 @@ var autoAjax = {
                     on = vnode.data.on||{},
                     mergedOptions = autoAjax.core.mergeOptions({
                         //Bind Vuejs events
-                        events : {
-                            submit : on.submit||on.onSubmit,
-                            success : on.success||on.onSuccess,
-                            error : on.error||on.onError,
-                            validation : on.validation||on.onValidation,
-                        }
+                        submit : on.submit||on.onSubmit,
+                        success : on.success||on.onSuccess,
+                        error : on.error||on.onError,
+                        validation : on.validation||on.onValidation,
                     }, options);
 
                 $(el).autoAjax(mergedOptions);
@@ -331,8 +437,10 @@ $.fn.autoAjax = function(options){
         if ( this.autoAjaxOptions )
             return;
 
+        var defaultOptions = cloneDeep(autoAjax.options);
+
         //Bind ajax options into exact form
-        this.autoAjaxOptions = Object.assign(autoAjax.core.mergeOptions(autoAjax.options, options), {
+        this.autoAjaxOptions = Object.assign(autoAjax.core.mergeOptions(defaultOptions, options), {
             status : 'ready',
         });
 
@@ -354,8 +462,8 @@ $.fn.autoAjax = function(options){
 
             //Fire submit event
             autoAjax.core.fireEventsOn([
-                this.autoAjaxOptions.events.submit,
-                this.autoAjaxOptions.events.onSubmit
+                this.autoAjaxOptions.submit,
+                this.autoAjaxOptions.onSubmit
             ], [form]);
 
             autoAjax.core.resetErrors(form);
