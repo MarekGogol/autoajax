@@ -163,6 +163,9 @@ AutoAjax options can be applied in VueJs directive `v-autoAjax="myOptions"` or i
 
 ```js
 var options = {
+    //Automatically resets all form inputs to default values after success response
+    autoReset : false,
+    
     //Automaticaly add validation errors to each input
     validationInputErrors : true,
     
