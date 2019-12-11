@@ -14,7 +14,7 @@ This package builds and sends ajax requests from `<form>` inputs. Then automatic
 ### Installation via NPM
 `npm i autoajax --save`
 
-### Basic installation
+### Or basic installation
 ```html
 <!-- jQuery and jQuery form -->
 <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
