@@ -40,7 +40,10 @@ var autoAjax = {
 
         //Add validation error message after this element
         addErrorMessageAfterElement(input){
-            //You can modify, where should be placed validation error message for each onput
+            //You can modify, where should be placed validation error message for each input
+            //If you want place validation after input parent, you can do something like:
+            //return input.parent();
+
             return input;
         },
 
