@@ -117,9 +117,9 @@ This is list of available form events. Need to be placed in form element.
 # Plain JavaScript Integration
 
 ### Initializing autoAjax form instance in plain JS
-If you want initialize autoAjax form, you need use `autoAjax` class on form element.
+If you want initialize autoAjax form, you initialize `autoAjax` method on your form element.
 ```html
-<form method="post" action="/contact" class="autoAjax">
+<form method="post" action="/contact" class="myAutoAjaxform">
     <div class="form-group">
         <input type="text" name="email">
     </div>
@@ -134,7 +134,9 @@ If you want initialize autoAjax form, you need use `autoAjax` class on form elem
 <script>
 $(function(){
     var options = {
-        //...
+        //Resets for on success response
+        autoReset : true,
+    
         onSubmit : function(data, response){},
         onSuccess : function(data, response){},
         onError : function(data, response){},
@@ -144,19 +146,17 @@ $(function(){
         //Can be used also form without "on" at the beggining
         // submit : function(data, response){...
         // success : function(data, response){...
+    
+        //and any other settings from autoAjax options...
     };
     
-    $('form.autoAjax').autoAjax(options)
+    $('form.myAutoAjaxform').autoAjax(options)
 });
 </script>
 ```
 
 #### Available classes for HTML forms
-`autoAjax` - initialize autoAjax instance
-
 `autoReset` - resets form values after success message
-
-`noValidationMessage` - disables validation alert message.
 
 # AutoAjax Options
 AutoAjax options can be applied in VueJs directive `v-autoAjax="myOptions"` or in jQuery initialization autoAjax on form element `$('#myForm').autoAjax({ ... })`. This options will be applied only on selected form instance.
