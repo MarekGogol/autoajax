@@ -5,14 +5,14 @@ var autoAjax = {
         //Auto reset form on success
         autoReset : false,
 
-        //Automaticaly add validation error messages into each bad filled input
-        validationInputErrors : true,
+        //Automaticaly add validation error messages after each bad filled input
+        showInputErrors : true,
 
         //General success/error/validation form message
-        messageAlert : true,
+        showMessage : true,
 
         //Automatically bind validation message
-        validationMessage : true,
+        showValidationMessage : true,
 
         //Available selectors and classes
         selectors : {
@@ -74,7 +74,7 @@ var autoAjax = {
                         autoAjax.core.showModal(data);
                     } else {
                         //Show message alert
-                        if ( options.messageAlert === true ) {
+                        if ( options.showMessage === true ) {
                             autoAjax.core.setMessage(form, data.message, 'message' in data ? 'success' : 'error');
                         }
 
@@ -98,7 +98,7 @@ var autoAjax = {
                 var obj = response.responseJSON,
                     options = autoAjax.core.getFormOptions(form);
 
-                if ( options.messageAlert === true ) {
+                if ( options.showMessage === true ) {
                     autoAjax.core.setMessage(form, obj ? obj.message||options.messages.error : options.messages.error, 'error');
                 }
             },
@@ -113,7 +113,7 @@ var autoAjax = {
                         obj = obj.errors;
                     }
 
-                    if ( options.validationInputErrors === true ) {
+                    if ( options.showInputErrors === true ) {
                         for ( var key in obj )
                         {
                             var message = $.isArray(obj[key]) ? obj[key][0] : obj[key];
@@ -123,7 +123,7 @@ var autoAjax = {
                     }
 
                     //Show validation message alert
-                    if ( options.messageAlert === true && options.validationMessage === true ) {
+                    if ( options.showMessage === true && options.showValidationMessage === true ) {
                         autoAjax.core.setMessage(form, options.messages.validation, 'error');
                     }
                 }
