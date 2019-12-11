@@ -108,6 +108,7 @@ This is list of available form events. Need to be placed in form element.
 #### On (laravel) validation error **HTTP 422** or **HTTP 430** error code
 `@validation="myValidationErrorEvent"` or `@onValidation="myValidationErrorEvent"`
 
+#### On all completed HTTP responses with any code
 `@complete="myCompleteEvent"` or `@onComplete="myCompleteEvent"`
 
 
