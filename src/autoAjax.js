@@ -1,5 +1,8 @@
 const cloneDeep = require('lodash.clonedeep');
 
+var resetsForm = require('./components/resetsForm').default,
+    bindForm = require('./components/bindForm').default;
+
 var autoAjax = {
     options : {
         //Auto reset form on success
@@ -55,11 +58,7 @@ var autoAjax = {
 
                 //Reset form on success message if has autoReset class
                 if ( canResetForm && !('error' in response) ) {
-                    var resetItems = form.find('input, select, textarea').not('input[name="_token"], input[type="submit"], input[type="checkbox"], input[type="hidden"]').val('');
-
-                    resetItems = resetItems.add(form.find('input[type="checkbox"]').each(function(){
-                        this.checked = false;
-                    }));
+                    var resetItems = resetsForm.resetForm(form);
 
                     autoAjax.core.triggerChangeEvent(resetItems);
                 }
@@ -136,7 +135,7 @@ var autoAjax = {
          * Return form options
          */
         getFormOptions(form){
-            var options = (form[0]||form).autoAjaxOptions;
+            var options = (form.tagName == 'FORM' ? form : form[0]).autoAjaxOptions;
 
             return options||{};
         },
@@ -162,75 +161,6 @@ var autoAjax = {
             }
 
             return oldOptions;
-        },
-        /**
-         * Automatically bind form values from data-row attribute
-         *
-         * @param  object/json  obj
-         */
-        bindRow : function(obj){
-            var data = obj||$(this).attr('data-row');
-
-            if ( data ) {
-                var data = obj||$.parseJSON( data );
-
-                for ( key in data ) {
-                    var input = $(this).find('*[name="'+key+'"]');
-
-                    if ( (!data[key] || data[key].length == 0) && (data[key] !== false && data[key] !== 0) ) {
-                        continue;
-                    }
-
-                    autoAjax.core.bindValue($(this), input, key, data[key]);
-                }
-            }
-        },
-        triggerChangeEvent(input){
-            input.each(function(){
-                $(this).change().trigger("chosen:updated");
-                this.dispatchEvent(new Event('input', { 'bubbles': true }))
-                this.dispatchEvent(new Event('change', { 'bubbles': true }))
-            })
-        },
-        /**
-         * Bind value into input
-         */
-        bindValue : function(form, input, key, value){
-            if ( input.is('input:file') )
-                return;
-
-            if ( input.is('input:radio') || input.is('input:checkbox') )
-            {
-                if ( value === true )
-                    value = 1;
-                else if ( value === false )
-                    value = 0;
-
-                input = form.find('*[name="'+key+'"][value="'+value+'"]');
-                input.prop("checked", true);
-            } else {
-                if ( value === true )
-                    value = 1;
-                else if ( value === false )
-                    value = 0;
-
-                input.val(value);
-            }
-
-            autoAjax.core.triggerChangeEvent(input);
-        },
-        /*
-         * Datepicker inputs into form
-         */
-        bindDatepickers(){
-            if ( ! ('datepicker' in jQuery.fn) )
-                return;
-
-            $(this).find('.js_date').datepicker({
-                autoclose: true,
-                format: 'dd.mm.yyyy',
-                language: 'sk',
-            });
         },
         /**
          * Reset all errors
@@ -436,6 +366,20 @@ var autoAjax = {
                 el.autoAjaxOptions.autoReset = true
             },
         });
+
+        Vue.directive('autoAjaxRow', {
+            bind(el, binding, vnode) {
+                var options = autoAjax.core.getFormOptions(el);
+
+                bindForm.bindRow(el, binding.value||{}, options);
+            },
+            update(el, binding, vnode) {
+                //If value has been reseted
+                if ( binding.oldValue && binding.value === null ) {
+                    resetsForm.resetForm($(el));
+                }
+            }
+        });
     },
 }
 
@@ -456,8 +400,10 @@ $.fn.autoAjax = function(options){
         });
 
         //Bind given row data and datepicker
-        autoAjax.core.bindRow.call(this);
-        autoAjax.core.bindDatepickers.call(this);
+        resetsForm.init(this);
+
+        bindForm.bindRow(this, null, this.autoAjaxOptions);
+        bindForm.bindDatepickers(this);
 
         /*
          * After submit form
