@@ -67,8 +67,17 @@ var autoAjax = {
                 if ( typeof data != 'object' )
                     return;
 
+                //Redirect on callback
+                if ( 'redirect' in data && data.redirect ) {
+                    if ( data.redirect == window.location.href ) {
+                        return window.location.reload();
+                    }
+
+                    window.location.href = data.redirect;
+                }
+
                 //Show messages
-                if ( 'error' in data || 'message' in data || 'callback' in data ) {
+                else if ( 'error' in data || 'message' in data || 'callback' in data ) {
                     if ( data.type == 'modal' ) {
                         autoAjax.core.showModal(data);
                     } else {
@@ -80,17 +89,6 @@ var autoAjax = {
                         if ( 'callback' in data )
                             eval(data.callback);
                     }
-
-                    return true;
-                }
-
-                //Redirect on callback
-                else if ( 'redirect' in data ) {
-                    if ( data.redirect == window.location.href ) {
-                        return window.location.reload();
-                    }
-
-                    window.location.href = data.redirect;
                 }
             },
             error(data, response, form){
