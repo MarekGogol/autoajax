@@ -44,6 +44,14 @@ var bindForm = {
                 value = 0;
 
             input = form.find('*[name="'+key+'"][value="'+value+'"]');
+
+            //If no input with given value has been found, and value is turned to on
+            //We need check any found input with same name. Because if no value is present in attribute
+            //Browser will send "on" value.
+            if ( input.length === 0 && ['on'].indexOf(value) > -1 ) {
+                input = form.find('*[name="'+key+'"]');
+            }
+
             input.prop("checked", true);
         } else {
             if ( value === true )
