@@ -60,7 +60,7 @@ var autoAjax = {
                 if ( canResetForm && !('error' in response) ) {
                     var resetItems = resetsForm.resetForm(form);
 
-                    autoAjax.core.triggerChangeEvent(resetItems);
+                    bindForm.triggerChangeEvent(resetItems);
                 }
 
                 //Does not process success events if returned data is not object type
