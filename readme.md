@@ -35,7 +35,7 @@ Vue.use(autoAjax);
 If you want initialize autoAjax form in VueJS component, you need use `v-autoAjax` directive in form element.
 ```html
 <template>
-    <form method="post" action="/contact" v-autoAjax="formOptions" @onSubmit="onSubmit" @onSuccess="successEvent" @onValidation="validationEvent" @onError="errorEvent" @onComplete="onComplete">
+    <form method="post" action="/contact" v-autoAjax="formOptions" v-autoAjaxRow="rowData" @onSubmit="onSubmit" @onSuccess="successEvent" @onValidation="validationEvent" @onError="errorEvent" @onComplete="onComplete">
         <div class="form-group">
             <input type="text" name="email">
         </div>
@@ -51,6 +51,10 @@ If you want initialize autoAjax form in VueJS component, you need use `v-autoAja
 <script>
 export default {
     data: {
+        rowData : {
+            email : 'example@example.com',
+            content : 'content',
+        },
         formOptions : {
             //...
         }
@@ -94,6 +98,11 @@ For custom form options you can use directive with options parameter like:
 <form v-autoAjax v-autoReset></form>
 ```
 
+#### Automatically bind row data into form fields
+```html
+<form v-autoAjax v-autoAjaxRow="myRowData"></form>
+```
+
 ### VueJs Events
 This is list of available form events. Need to be placed in form element.
 
@@ -119,7 +128,7 @@ This is list of available form events. Need to be placed in form element.
 ### Initializing autoAjax form instance in plain JS
 If you want initialize autoAjax form, you initialize `autoAjax` method on your form element.
 ```html
-<form method="post" action="/contact" class="myAutoAjaxform">
+<form method="post" action="/contact" data-row="{ email : 'example@example.com' }" class="myAutoAjaxform">
     <div class="form-group">
         <input type="text" name="email">
     </div>
@@ -157,6 +166,9 @@ $(function(){
 
 #### Available classes for HTML forms
 `autoReset` - resets form values after success message
+
+#### Available attributes for HTML forms
+`data-row` - JSON Value of data which will be binded into form fields.
 
 # AutoAjax Options
 AutoAjax options can be applied in VueJs directive `v-autoAjax="myOptions"` or in jQuery initialization autoAjax on form element `$('#myForm').autoAjax({ ... })`. This options will be applied only on selected form instance.
