@@ -1,6 +1,6 @@
 {
   "name": "autoajax",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "AutoAjax form library for sending forms and automaticall laravel validation.",
   "main": "src/index.js",
   "scripts": {

@@ -372,9 +372,19 @@ var autoAjax = {
                 bindForm.bindRow(el, binding.value||{}, options);
             },
             update(el, binding, vnode) {
+                //If row does not have previous value
+                if ( ! binding.oldValue ) {
+                    return;
+                }
+
                 //If value has been reseted
-                if ( binding.oldValue && binding.value === null ) {
+                if ( binding.value === null ) {
                     resetsForm.resetForm($(el));
+                }
+
+                //If row has been changed
+                else {
+                    bindForm.bindRow(el, binding.value||{}, options);
                 }
             }
         });
