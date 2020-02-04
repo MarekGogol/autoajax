@@ -228,7 +228,13 @@ var autoAjax = {
 
             //Add error message element after imput
             errorInputs.each(function(){
-                var addAfter = options.addErrorMessageAfterElement( $(this) );
+                var addAfter = options.addErrorMessageAfterElement( $(this) ),
+                    nextElement = addAfter.next()[0];
+
+                //If error message has been already added on this place
+                if ( nextElement && nextElement.outerHTML === errorElement ) {
+                    return;
+                }
 
                 addAfter.after(errorElement);
 
