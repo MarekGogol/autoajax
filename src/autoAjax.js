@@ -231,16 +231,14 @@ var autoAjax = {
                 var addAfter = options.addErrorMessageAfterElement( $(this) ),
                     nextElement = addAfter.next()[0];
 
-                //If error message has been already added on this place
-                if ( nextElement && nextElement.outerHTML === errorElement ) {
-                    return;
-                }
-
-                addAfter.after(errorElement);
-
                 //If input does not has bffer
                 if ( ! this._addedErrorMesageIntoInput ) {
                     this._addedErrorMesageIntoInput = [];
+                }
+
+                //If error message has not been already added on this place
+                if ( !nextElement || nextElement.outerHTML !== errorElement ) {
+                    addAfter.after(errorElement);
                 }
 
                 //Add error message into buffer of actual input
