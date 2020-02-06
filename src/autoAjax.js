@@ -1,4 +1,5 @@
-const cloneDeep = require('lodash.clonedeep');
+const cloneDeep = require('lodash.clonedeep'),
+      isEqual = require('lodash.isequal');
 
 var resetsForm = require('./components/resetsForm').default,
     bindForm = require('./components/bindForm').default;
@@ -359,6 +360,11 @@ var autoAjax = {
                 $(el).autoAjax(mergedOptions);
             },
             update(el, binding, vnode) {
+                //If value has not been changed
+                if ( ! binding.oldValue || isEqual(binding.value, binding.oldValue) ) {
+                    return;
+                }
+
                 el.autoAjaxOptions = autoAjax.core.mergeOptions(el.autoAjaxOptions, binding.value||{})
             }
         });
@@ -377,7 +383,7 @@ var autoAjax = {
             },
             update(el, binding, vnode) {
                 //If row does not have previous value
-                if ( ! binding.oldValue ) {
+                if ( ! binding.oldValue || isEqual(binding.value, binding.oldValue) ) {
                     return;
                 }
 
