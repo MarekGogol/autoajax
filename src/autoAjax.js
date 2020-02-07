@@ -32,6 +32,12 @@ var autoAjax = {
             validation: 'Please fill all required fields.',
         },
 
+        //Scrolling on wrong input elements
+        scrollOnErrorInput : true,
+        errorInputScrollSpeed : 500,
+        errorInputScrollOffset : 100,
+        focusWrongTextInput : true,
+
         submit(form){ },
         success(data, response, form){ },
         error(data, response, form){ },
@@ -104,19 +110,23 @@ var autoAjax = {
                 var obj = response.responseJSON,
                     options = autoAjax.core.getFormOptions(form);
 
-                if ( response.status == 422 )
-                {
+                if ( response.status == 422 ) {
                     //Laravel 5.5 provides validation errors in errors object.
                     if ( 'errors' in obj && !('length' in obj.errors) ) {
                         obj = obj.errors;
                     }
 
                     if ( options.showInputErrors === true ) {
-                        for ( var key in obj )
-                        {
-                            var message = $.isArray(obj[key]) ? obj[key][0] : obj[key];
+                        //We want sorted keys by form positions, not backend validation positions
+                        //Because of scrolling to field in right order
+                        let keys = autoAjax.core.sortKeysByFormOrder(form, obj);
 
-                            autoAjax.core.setErrorMessage(form, key, message)
+                        for ( var i = 0; i < keys.length; i++ )
+                        {
+                            let key = keys[i],
+                                message = $.isArray(obj[key]) ? obj[key][0] : obj[key];
+
+                            autoAjax.core.setErrorMessage(form, key, message, obj)
                         }
                     }
 
@@ -220,12 +230,51 @@ var autoAjax = {
             }
         },
         /*
+         * Scroll on wrong input field an select it
+         */
+        scrollOnWrongInput(element, form, options){
+            if ( element.length == 0 || form[0].scrolledOnWrongInput === true ) {
+                return;
+            }
+
+            var top = element.offset().top - options.errorInputScrollOffset,
+                activeElement = document.activeElement;
+
+            //We does not want scrool if element is hidden
+            if ( top <= 0 || element.is(':hidden') ) {
+                form[0].scrolledOnWrongInput = true;
+
+                return;
+            }
+
+            form[0].scrolledOnWrongInput = true;
+
+            //Scroll on wrong input
+            $('html, body').animate({
+                scrollTop: top,
+            }, options.errorInputScrollSpeed);
+
+            //Focus wrong text inputs
+            if (
+                options.focusWrongTextInput === true //If we can focus error inputs
+                && ['text', 'number', 'phone', 'date'].indexOf(element.attr('type')) > -1 //If is text input
+                && !(activeElement && (activeElement._addedErrorMesageIntoInput||[]).length > 0) //If is not select error input already
+            ) {
+                element.focus()
+            }
+        },
+        /*
          * Set input error message
          */
-        setErrorMessage : function(form, key, message){
+        setErrorMessage : function(form, key, message, obj){
             var options = autoAjax.core.getFormOptions(form),
                 errorElement = options.getErrorMessageElement(message, key, form),
                 errorInputs = form.find('input[name="'+key+'"], select[name="'+key+'"], textarea[name="'+key+'"]')
+
+            //Scroll on first error element
+            if ( options.scrollOnErrorInput === true && errorInputs.length > 0 ) {
+                this.scrollOnWrongInput(errorInputs.eq(0), form, options);
+            }
 
             //Add error message element after imput
             errorInputs.each(function(){
@@ -257,7 +306,8 @@ var autoAjax = {
             errorInputs
                 //If input changes, remove errors
                 .on('keyup change', function(e){
-                    if ( e.keyCode == 13 ) {
+                    //On tab and esc does not remove errors
+                    if ( [13, 9].indexOf(e.keyCode) > -1 ) {
                         return;
                     }
 
@@ -266,6 +316,9 @@ var autoAjax = {
                         for ( var i = 0; i < this._addedErrorMesageIntoInput.length; i++ ) {
                             this._addedErrorMesageIntoInput[i].remove();
                         }
+
+                        //Reset array
+                        this._addedErrorMesageIntoInput = [];
                     }
 
                     $(this).parent().removeClass(autoAjax.core.getClass('inputWrapperErrorClass', form, true));
@@ -297,6 +350,7 @@ var autoAjax = {
 
             //Set ajax status as done
             options.status = 'ready';
+            autoAjax.core.setLoading(form[0], false);
 
             //On success response
             if ( response.status == 200 ) {
@@ -332,6 +386,28 @@ var autoAjax = {
                 options.globalEvents.complete
             ], finalResponse);
         },
+        /*
+         * Set loading status of form
+         */
+        setLoading(element, status){
+            if ( element.vnode && element.vnode.data.on && element.vnode.data.on.loading ) {
+                element.vnode.data.on.loading(status);
+            }
+        },
+        /*
+         * Get keys from request in correct order by fields position in form
+         */
+        sortKeysByFormOrder(form, obj){
+            var formKeys = form.find('input[name], textarea[name], select[name]')
+                               .toArray()
+                               .map(field => field.name)
+                               .filter(name => name),
+                newObjectKeys = Object.keys(obj||[]).sort((a, b) => {
+                    return formKeys.indexOf(a) - formKeys.indexOf(b);
+                });
+
+            return newObjectKeys;
+        }
     },
 
     setOptions(options){
@@ -357,6 +433,9 @@ var autoAjax = {
                         complete : on.complete||on.onComplete,
                     }, options);
 
+                //Set vnode of element
+                el.vnode = vnode;
+
                 $(el).autoAjax(mergedOptions);
             },
             update(el, binding, vnode) {
@@ -375,29 +454,32 @@ var autoAjax = {
             },
         });
 
-        Vue.directive('autoAjaxRow', {
-            bind(el, binding, vnode) {
-                var options = autoAjax.core.getFormOptions(el);
+        ['autoAjaxRow', 'bindRow', 'row'].forEach(key => {
+            Vue.directive(key, {
+                bind(el, binding, vnode) {
+                    var options = autoAjax.core.getFormOptions(el);
 
-                bindForm.bindRow(el, binding.value||{}, options);
-            },
-            update(el, binding, vnode) {
-                //If row does not have previous value
-                if ( ! binding.oldValue || isEqual(binding.value, binding.oldValue) ) {
-                    return;
-                }
-
-                //If value has been reseted
-                if ( binding.value === null ) {
-                    resetsForm.resetForm($(el));
-                }
-
-                //If row has been changed
-                else {
                     bindForm.bindRow(el, binding.value||{}, options);
+                },
+                update(el, binding, vnode) {
+                    //If row does not have previous value
+                    if ( ! binding.oldValue || isEqual(binding.value, binding.oldValue) ) {
+                        return;
+                    }
+
+                    //If value has been reseted
+                    if ( binding.value === null ) {
+                        resetsForm.resetForm($(el));
+                    }
+
+                    //If row has been changed
+                    else {
+                        bindForm.bindRow(el, binding.value||{}, options);
+                    }
                 }
-            }
-        });
+            });
+
+        })
     },
 }
 
@@ -434,6 +516,10 @@ $.fn.autoAjax = function(options){
             var form = $(this);
 
             this.autoAjaxOptions.status = 'sending';
+
+            autoAjax.core.setLoading(this, true);
+
+            this.scrolledOnWrongInput = false;
 
             //Fire submit event
             autoAjax.core.fireEventsOn([
