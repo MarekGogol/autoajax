@@ -229,6 +229,11 @@ var autoAjax = {
                     .show();
             }
         },
+        getFieldScrollPosition(element, options){
+            var top = element.offset().top;
+
+            return top > options.errorInputScrollOffset ? top - options.errorInputScrollOffset : top;
+        },
         /*
          * Scroll on wrong input field an select it
          */
@@ -237,14 +242,24 @@ var autoAjax = {
                 return;
             }
 
-            var top = element.offset().top - options.errorInputScrollOffset,
-                activeElement = document.activeElement;
+            var top = this.getFieldScrollPosition(element, options),
+                activeElement = document.activeElement,
+                isHidden = element.is(':hidden');
 
             //We does not want scrool if element is hidden
-            if ( top <= 0 || element.is(':hidden') ) {
-                form[0].scrolledOnWrongInput = true;
+            if ( top <= 0 || isHidden ) {
+                var parent = element.parent();
 
-                return;
+                //If field is hidden and parent group is visible
+                if ( isHidden && parent.is(':visible') ) {
+                    top = this.getFieldScrollPosition(parent, options);
+                }
+
+                //If field does not have visible parent
+                else {
+                    form[0].scrolledOnWrongInput = true;
+                    return;
+                }
             }
 
             form[0].scrolledOnWrongInput = true;
