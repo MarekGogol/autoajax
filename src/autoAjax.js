@@ -230,9 +230,16 @@ var autoAjax = {
             }
         },
         getFieldScrollPosition(element, options){
-            var top = element.offset().top;
+            var top = element.offset().top,
+                offset = options.errorInputScrollOffset;
 
-            return top > options.errorInputScrollOffset ? top - options.errorInputScrollOffset : top;
+            //Scroll offset can be dynamic function which returns number.
+            //Because sometimes for mobile version, we want other offset.
+            if ( typeof offset == 'function' ) {
+                offset = offset();
+            }
+
+            return top > offset ? top - offset : top;
         },
         /*
          * Scroll on wrong input field an select it
