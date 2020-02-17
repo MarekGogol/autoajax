@@ -2,12 +2,16 @@ const cloneDeep = require('lodash.clonedeep'),
       isEqual = require('lodash.isequal');
 
 var resetsForm = require('./components/resetsForm').default,
-    bindForm = require('./components/bindForm').default;
+    bindForm = require('./components/bindForm').default,
+    autoSave = require('./components/autoSave').default;
 
 var autoAjax = {
     options : {
         //Auto reset form on success
         autoReset : false,
+
+        //Automatically save all unsaved form changed
+        autoSave : false,
 
         //Automaticaly add validation error messages after each bad filled input
         showInputErrors : true,
@@ -438,6 +442,10 @@ var autoAjax = {
         return this;
     },
 
+    flushAutoSave(){
+        autoSave.flushData();
+    },
+
     /*
      * Create installable vuejs package
      */
@@ -458,7 +466,9 @@ var autoAjax = {
                 //Set vnode of element
                 el.vnode = vnode;
 
-                $(el).autoAjax(mergedOptions);
+                vnode.context.$nextTick(() => {
+                    $(el).autoAjax(mergedOptions);
+                });
             },
             update(el, binding, vnode) {
                 //If value has not been changed
@@ -472,16 +482,22 @@ var autoAjax = {
 
         Vue.directive('autoReset', {
             bind(el, binding, vnode) {
-                el.autoAjaxOptions.autoReset = true
+                vnode.context.$nextTick(() => {
+                    el.autoAjaxOptions.autoReset = true
+                });
             },
         });
 
         ['autoAjaxRow', 'bindRow', 'row'].forEach(key => {
             Vue.directive(key, {
                 bind(el, binding, vnode) {
-                    var options = autoAjax.core.getFormOptions(el);
+                    vnode.context.$nextTick(() => {
+                        var options = autoAjax.core.getFormOptions(el);
 
-                    bindForm.bindRow(el, binding.value||{}, options);
+                        if ( binding.value ) {
+                            bindForm.bindRow(el, binding.value, options);
+                        }
+                    });
                 },
                 update(el, binding, vnode) {
                     //If row does not have previous value
@@ -496,6 +512,8 @@ var autoAjax = {
 
                     //If row has been changed
                     else {
+                        var options = autoAjax.core.getFormOptions(el);
+
                         bindForm.bindRow(el, binding.value||{}, options);
                     }
                 }
@@ -524,6 +542,7 @@ $.fn.autoAjax = function(options){
         //Bind given row data and datepicker
         resetsForm.init(this);
 
+        autoSave.formAutoSave(this, this.autoAjaxOptions);
         bindForm.bindRow(this, null, this.autoAjaxOptions);
         bindForm.bindDatepickers(this);
 

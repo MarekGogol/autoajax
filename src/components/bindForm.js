@@ -1,3 +1,5 @@
+var autoSave = require('./autoSave').default;
+
 var bindForm = {
     /**
      * Automatically bind form values from data-row attribute
@@ -5,7 +7,7 @@ var bindForm = {
      * @param  object/json  obj
      */
     bindRow : function(form, obj, options){
-        var data = obj||options.row||$(form).attr('data-row');
+        var data = obj||options.row||$(form).attr('data-row')||autoSave.getFormData(form, options);
             form = $(form);
 
         if ( data ) {
