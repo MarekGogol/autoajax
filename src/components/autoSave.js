@@ -57,7 +57,7 @@ var autoSave = {
         var formPath = this.getFormKey(form, options),
             timeout;
 
-        $(form).on('change', function(){
+        $(form).on('change keyup', () => {
             if ( timeout ) {
                 clearTimeout(timeout);
             }
