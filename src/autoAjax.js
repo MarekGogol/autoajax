@@ -120,18 +120,16 @@ var autoAjax = {
                         obj = obj.errors;
                     }
 
-                    if ( options.showInputErrors === true ) {
-                        //We want sorted keys by form positions, not backend validation positions
-                        //Because of scrolling to field in right order
-                        let keys = autoAjax.core.sortKeysByFormOrder(form, obj);
+                    //We want sorted keys by form positions, not backend validation positions
+                    //Because of scrolling to field in right order
+                    let keys = autoAjax.core.sortKeysByFormOrder(form, obj);
 
-                        for ( var i = 0; i < keys.length; i++ )
-                        {
-                            let key = keys[i],
-                                message = $.isArray(obj[key]) ? obj[key][0] : obj[key];
+                    for ( var i = 0; i < keys.length; i++ )
+                    {
+                        let key = keys[i],
+                            message = $.isArray(obj[key]) ? obj[key][0] : obj[key];
 
-                            autoAjax.core.setErrorMessage(form, key, message, obj)
-                        }
+                        autoAjax.core.setErrorMessage(form, key, message, obj);
                     }
 
                     //Show validation message alert
@@ -303,30 +301,32 @@ var autoAjax = {
             }
 
             //Add error message element after imput
-            errorInputs.each(function(){
-                var addAfter = options.addErrorMessageAfterElement( $(this) ),
-                    nextElement = addAfter.next()[0];
+            if ( options.showInputErrors === true ) {
+                errorInputs.each(function(){
+                    var addAfter = options.addErrorMessageAfterElement( $(this) ),
+                        nextElement = addAfter.next()[0];
 
-                //If input does not has bffer
-                if ( ! this._addedErrorMesageIntoInput ) {
-                    this._addedErrorMesageIntoInput = [];
-                }
+                    //If input does not has bffer
+                    if ( ! this._addedErrorMesageIntoInput ) {
+                        this._addedErrorMesageIntoInput = [];
+                    }
 
-                //If error message has not been already added on this place
-                if ( !nextElement || nextElement.outerHTML !== errorElement ) {
-                    addAfter.after(errorElement);
-                }
+                    //If error message has not been already added on this place
+                    if ( !nextElement || nextElement.outerHTML !== errorElement ) {
+                        addAfter.after(errorElement);
+                    }
 
-                //Add error message into buffer of actual input
-                this._addedErrorMesageIntoInput.push(addAfter.next()[0]);
+                    //Add error message into buffer of actual input
+                    this._addedErrorMesageIntoInput.push(addAfter.next()[0]);
 
-                //If form does not have stack with error messages
-                if ( ! form[0]._addedErrorMessages ) {
-                    form[0]._addedErrorMessages = [];
-                }
+                    //If form does not have stack with error messages
+                    if ( ! form[0]._addedErrorMessages ) {
+                        form[0]._addedErrorMessages = [];
+                    }
 
-                form[0]._addedErrorMessages.push(addAfter.next()[0]);
-            });
+                    form[0]._addedErrorMessages.push(addAfter.next()[0]);
+                });
+            }
 
             //Add error class on input parent
             errorInputs
