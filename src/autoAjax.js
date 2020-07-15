@@ -379,7 +379,7 @@ var autoAjax = {
             autoAjax.core.setLoading(form[0], false);
 
             //On success response
-            if ( response.status == 200 ) {
+            if ( [200, 201].indexOf(response.status) ) {
                 this.fireEventsOn([
                     options.success,
                     options.onSuccess,
