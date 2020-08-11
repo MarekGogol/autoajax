@@ -61,6 +61,11 @@ var autoAjax = {
             return input;
         },
 
+        //Returns input parrent wrapper where .has-error class will be added
+        getInputParentWrapper(input){
+            return input.parent();
+        },
+
         //Global callback events for every form, such as validation, error handling etc...
         globalEvents : {
             success(data, response, form){
@@ -281,7 +286,7 @@ var autoAjax = {
             //Focus wrong text inputs
             if (
                 options.focusWrongTextInput === true //If we can focus error inputs
-                && ['text', 'number', 'phone', 'date'].indexOf(element.attr('type')) > -1 //If is text input
+                && ['text', 'email', 'number', 'phone', 'date'].indexOf(element.attr('type')) > -1 //If is text input
                 && !(activeElement && (activeElement._addedErrorMesageIntoInput||[]).length > 0) //If is not select error input already
             ) {
                 element.focus()
@@ -347,12 +352,17 @@ var autoAjax = {
                         this._addedErrorMesageIntoInput = [];
                     }
 
-                    $(this).parent().removeClass(autoAjax.core.getClass('inputWrapperErrorClass', form, true));
-                })
+                    options.getInputParentWrapper($(this)).removeClass(autoAjax.core.getClass('inputWrapperErrorClass', form, true));
+                });
 
-                //Add error class on input wrapper
-                .parent().addClass(autoAjax.core.getClass('inputWrapperErrorClass', form, true))
-            },
+
+            //Add error class on input wrapper
+            errorInputs.each(function(){
+                options.getInputParentWrapper($(this)).addClass(
+                    autoAjax.core.getClass('inputWrapperErrorClass', form, true)
+                );
+            });
+        },
         /*
          * Show modal with callback
          */
