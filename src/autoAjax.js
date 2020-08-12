@@ -42,6 +42,7 @@ var autoAjax = {
         errorInputScrollOffset : 100,
         focusWrongTextInput : true,
 
+        onCreate(form){ },
         submit(form){ },
         success(data, response, form){ },
         error(data, response, form){ },
@@ -588,6 +589,12 @@ $.fn.autoAjax = function(options){
 
             return false;
         });
+
+        //Fire autoAjax init event
+        autoAjax.core.fireEventsOn([
+            this.autoAjaxOptions.create,
+            this.autoAjaxOptions.onCreate,
+        ], [$(this)]);
     });
 };
 
