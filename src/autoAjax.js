@@ -287,7 +287,7 @@ var autoAjax = {
             //Focus wrong text inputs
             if (
                 options.focusWrongTextInput === true //If we can focus error inputs
-                && ['text', 'email', 'number', 'phone', 'date', 'password', 'range'].indexOf(element.attr('type')) > -1 //If is text input
+                && ['text', 'email', 'number', 'phone', 'date', 'password', 'range', 'checkbox'].indexOf(element.attr('type')) > -1 //If is text input
                 && !(activeElement && (activeElement._addedErrorMesageIntoInput||[]).length > 0) //If is not select error input already
             ) {
                 element.focus()
