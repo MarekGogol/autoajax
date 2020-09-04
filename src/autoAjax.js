@@ -494,7 +494,12 @@ var autoAjax = {
         Vue.directive('autoReset', {
             bind(el, binding, vnode) {
                 vnode.context.$nextTick(() => {
-                    el.autoAjaxOptions.autoReset = true
+                    el.autoAjaxOptions.autoReset = binding.value == false ? false : true;
+                });
+            },
+            update(el, binding, vnode) {
+                vnode.context.$nextTick(() => {
+                    el.autoAjaxOptions.autoReset = binding.value == false ? false : true;
                 });
             },
         });
@@ -511,13 +516,15 @@ var autoAjax = {
                     });
                 },
                 update(el, binding, vnode) {
+                    var value = binding.value;
+
                     //If row does not have previous value
-                    if ( ! binding.oldValue || isEqual(binding.value, binding.oldValue) ) {
+                    if ( isEqual(value, binding.oldValue) ) {
                         return;
                     }
 
-                    //If value has been reseted
-                    if ( binding.value === null ) {
+                    //If value has been reseted, or empty object has been given
+                    if ( value === null || typeof value == 'object' && Object.keys(value).length == 0 ) {
                         resetsForm.resetForm($(el));
                     }
 
@@ -525,7 +532,7 @@ var autoAjax = {
                     else {
                         var options = autoAjax.core.getFormOptions(el);
 
-                        bindForm.bindRow(el, binding.value||{}, options);
+                        bindForm.bindRow(el, value||{}, options);
                     }
                 }
             });
