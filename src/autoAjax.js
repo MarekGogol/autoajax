@@ -309,8 +309,14 @@ var autoAjax = {
             //Add error message element after imput
             if ( options.showInputErrors === true ) {
                 errorInputs.each(function(){
-                    var addAfter = options.addErrorMessageAfterElement( $(this) ),
-                        nextElement = addAfter.next()[0];
+                    var addAfter = options.addErrorMessageAfterElement( $(this) );
+
+                    //If no element has been given, we want skip adding of error message
+                    if ( !addAfter ){
+                        return;
+                    }
+
+                    var nextElement = addAfter.next()[0];
 
                     //If input does not has bffer
                     if ( ! this._addedErrorMesageIntoInput ) {
