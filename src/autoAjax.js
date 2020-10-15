@@ -69,81 +69,87 @@ var autoAjax = {
 
         //Global callback events for every form, such as validation, error handling etc...
         globalEvents : {
-            success(data, response, form){
-                var options = autoAjax.core.getFormOptions(form),
-                    canResetForm = form.hasClass('autoReset') || options.autoReset === true;
+            success : [
+                (data, response, form) => {
+                    var options = autoAjax.core.getFormOptions(form),
+                        canResetForm = form.hasClass('autoReset') || options.autoReset === true;
 
-                //Reset form on success message if has autoReset class
-                if ( canResetForm && !('error' in response) ) {
-                    var resetItems = resetsForm.resetForm(form);
+                    //Reset form on success message if has autoReset class
+                    if ( canResetForm && !('error' in response) ) {
+                        var resetItems = resetsForm.resetForm(form);
 
-                    bindForm.triggerChangeEvent(resetItems);
-                }
-
-                //Does not process success events if returned data is not object type
-                if ( typeof data != 'object' )
-                    return;
-
-                //Redirect on callback
-                if ( 'redirect' in data && data.redirect ) {
-                    if ( data.redirect == window.location.href ) {
-                        return window.location.reload();
+                        bindForm.triggerChangeEvent(resetItems);
                     }
 
-                    window.location.href = data.redirect;
-                }
+                    //Does not process success events if returned data is not object type
+                    if ( typeof data != 'object' )
+                        return;
 
-                //Show messages
-                else if ( 'error' in data || 'message' in data || 'callback' in data ) {
-                    if ( data.type == 'modal' ) {
-                        autoAjax.core.showModal(data);
-                    } else {
-                        //Show message alert
-                        if ( options.showMessage === true ) {
-                            autoAjax.core.setMessage(form, data.message, 'message' in data ? 'success' : 'error');
+                    //Redirect on callback
+                    if ( 'redirect' in data && data.redirect ) {
+                        if ( data.redirect == window.location.href ) {
+                            return window.location.reload();
                         }
 
-                        if ( 'callback' in data )
-                            eval(data.callback);
-                    }
-                }
-            },
-            error(data, response, form){
-                var obj = response.responseJSON,
-                    options = autoAjax.core.getFormOptions(form);
-
-                if ( options.showMessage === true ) {
-                    autoAjax.core.setMessage(form, obj ? obj.message||options.messages.error : options.messages.error, 'error');
-                }
-            },
-            validation(data, response, form){
-                var obj = response.responseJSON,
-                    options = autoAjax.core.getFormOptions(form);
-
-                if ( response.status == 422 ) {
-                    //Laravel 5.5 provides validation errors in errors object.
-                    if ( 'errors' in obj && !('length' in obj.errors) ) {
-                        obj = obj.errors;
+                        window.location.href = data.redirect;
                     }
 
-                    //We want sorted keys by form positions, not backend validation positions
-                    //Because of scrolling to field in right order
-                    let keys = autoAjax.core.sortKeysByFormOrder(form, obj);
+                    //Show messages
+                    else if ( 'error' in data || 'message' in data || 'callback' in data ) {
+                        if ( data.type == 'modal' ) {
+                            autoAjax.core.showModal(data);
+                        } else {
+                            //Show message alert
+                            if ( options.showMessage === true ) {
+                                autoAjax.core.setMessage(form, data.message, 'message' in data ? 'success' : 'error');
+                            }
 
-                    for ( var i = 0; i < keys.length; i++ )
-                    {
-                        let key = keys[i],
-                            message = $.isArray(obj[key]) ? obj[key][0] : obj[key];
-
-                        autoAjax.core.setErrorMessage(form, key, message, obj);
+                            if ( 'callback' in data )
+                                eval(data.callback);
+                        }
                     }
+                },
+            ],
+            error : [
+                (data, response, form) => {
+                    var obj = response.responseJSON,
+                        options = autoAjax.core.getFormOptions(form);
 
-                    //Show validation message alert
-                    if ( options.showMessage === true && options.showValidationMessage === true ) {
-                        autoAjax.core.setMessage(form, options.messages.validation, 'error');
+                    if ( options.showMessage === true ) {
+                        autoAjax.core.setMessage(form, obj ? obj.message||options.messages.error : options.messages.error, 'error');
                     }
-                }
-            },
+                },
+            ],
+            validation : [
+                (data, response, form) => {
+                    var obj = response.responseJSON,
+                        options = autoAjax.core.getFormOptions(form);
+
+                    if ( response.status == 422 ) {
+                        //Laravel 5.5 provides validation errors in errors object.
+                        if ( 'errors' in obj && !('length' in obj.errors) ) {
+                            obj = obj.errors;
+                        }
+
+                        //We want sorted keys by form positions, not backend validation positions
+                        //Because of scrolling to field in right order
+                        let keys = autoAjax.core.sortKeysByFormOrder(form, obj);
+
+                        for ( var i = 0; i < keys.length; i++ )
+                        {
+                            let key = keys[i],
+                                message = $.isArray(obj[key]) ? obj[key][0] : obj[key];
+
+                            autoAjax.core.setErrorMessage(form, key, message, obj);
+                        }
+
+                        //Show validation message alert
+                        if ( options.showMessage === true && options.showValidationMessage === true ) {
+                            autoAjax.core.setMessage(form, options.messages.validation, 'error');
+                        }
+                    }
+                },
+            ],
         },
     },
 
@@ -163,7 +169,7 @@ var autoAjax = {
          */
         mergeOptions(oldOptions, newOptions){
             for ( var k in newOptions ) {
-                if ( typeof newOptions[k] === 'object' ) {
+                if ( typeof newOptions[k] === 'object' && !newOptions[k].length ) {
                     for ( var k1 in newOptions[k] ) {
                         if ( !(k in oldOptions) ) {
                             oldOptions[k] = newOptions[k];
@@ -309,14 +315,8 @@ var autoAjax = {
             //Add error message element after imput
             if ( options.showInputErrors === true ) {
                 errorInputs.each(function(){
-                    var addAfter = options.addErrorMessageAfterElement( $(this) );
-
-                    //If no element has been given, we want skip adding of error message
-                    if ( !addAfter ){
-                        return;
-                    }
-
-                    var nextElement = addAfter.next()[0];
+                    var addAfter = options.addErrorMessageAfterElement( $(this) ),
+                        nextElement = addAfter.next()[0];
 
                     //If input does not has bffer
                     if ( ! this._addedErrorMesageIntoInput ) {
@@ -378,8 +378,18 @@ var autoAjax = {
         },
         fireEventsOn(functions, parameters){
             for ( var i = 0; i < functions.length; i++ ) {
-                if ( functions[i] ) {
-                    functions[i](...parameters);
+                let callbacks = functions[i];
+
+                if ( callbacks ) {
+                    if ( typeof callbacks == 'function' ) {
+                        callbacks(...parameters);
+                    } else if ( typeof callbacks == 'object' ){
+                        callbacks = callbacks.filter(item => item);
+
+                        for ( var a = 0; a < callbacks.length; a++ ){
+                            callbacks[a](...parameters);
+                        }
+                    }
                 }
             }
         },
@@ -433,8 +443,10 @@ var autoAjax = {
          * Set loading status of form
          */
         setLoading(element, status){
-            if ( element.vnode && element.vnode.data.on && element.vnode.data.on.loading ) {
-                element.vnode.data.on.loading(status);
+            let props = element.vnode && element.vnode.data ? element.vnode.data.on : element.vnode.props;
+
+            if ( props && props.loading ) {
+                props.loading(status);
             }
         },
         /*
@@ -464,29 +476,51 @@ var autoAjax = {
     },
 
     /*
+     * Add support for vuejs 2 and vuejs 3
+     */
+    tryNextTick(vnode, callback){
+        if ( vnode.context ){
+            vnode.context.$nextTick(callback);
+        } else {
+            callback();
+        }
+    },
+
+    /**
+     * Vuejs 3 callback
+     */
+    onMounted(callback){
+        return {
+            bind : callback,
+            mounted : callback,
+        };
+    },
+
+    /*
      * Create installable vuejs package
      */
     install(Vue, options){
         Vue.directive('autoAjax', {
-            bind(el, binding, vnode) {
+            ...autoAjax.onMounted((el, binding, vnode, oldVnode) => {
                 var options = binding.value||{},
-                    on = vnode.data.on||{},
+                    on = vnode.data ? vnode.data.on||{} : vnode.props,
                     mergedOptions = autoAjax.core.mergeOptions({
                         //Bind Vuejs events
-                        submit : on.submit||on.onSubmit,
-                        success : on.success||on.onSuccess,
-                        error : on.error||on.onError,
-                        validation : on.validation||on.onValidation,
-                        complete : on.complete||on.onComplete,
+                        submit : [on.submit, on.onSubmit, on.onOnSubmit, autoAjax.options.submit],
+                        success : [on.success, on.onSuccess, on.onOnSuccess, autoAjax.options.success],
+                        error : [on.error, on.onError, on.onOnError, autoAjax.options.error],
+                        validation : [on.validation, on.onValidation, on.onOnValidation, autoAjax.options.validation],
+                        complete : [on.complete, on.onComplete, on.onOnComplete, autoAjax.options.complete],
                     }, options);
 
                 //Set vnode of element
                 el.vnode = vnode;
 
-                vnode.context.$nextTick(() => {
+
+                autoAjax.tryNextTick(vnode, () => {
                     $(el).autoAjax(mergedOptions);
                 });
-            },
+            }),
             update(el, binding, vnode) {
                 //If value has not been changed
                 if ( ! binding.oldValue || isEqual(binding.value, binding.oldValue) ) {
@@ -498,39 +532,32 @@ var autoAjax = {
         });
 
         Vue.directive('autoReset', {
-            bind(el, binding, vnode) {
-                vnode.context.$nextTick(() => {
-                    el.autoAjaxOptions.autoReset = binding.value == false ? false : true;
+            ...autoAjax.onMounted((el, binding, vnode) => {
+                autoAjax.tryNextTick(vnode, () => {
+                    el.autoAjaxOptions.autoReset = true
                 });
-            },
-            update(el, binding, vnode) {
-                vnode.context.$nextTick(() => {
-                    el.autoAjaxOptions.autoReset = binding.value == false ? false : true;
-                });
-            },
+            })
         });
 
         ['autoAjaxRow', 'bindRow', 'row'].forEach(key => {
             Vue.directive(key, {
-                bind(el, binding, vnode) {
-                    vnode.context.$nextTick(() => {
+                ...autoAjax.onMounted((el, binding, vnode) => {
+                    autoAjax.tryNextTick(vnode, () => {
                         var options = autoAjax.core.getFormOptions(el);
 
                         if ( binding.value ) {
                             bindForm.bindRow(el, binding.value, options);
                         }
                     });
-                },
+                }),
                 update(el, binding, vnode) {
-                    var value = binding.value;
-
                     //If row does not have previous value
-                    if ( isEqual(value, binding.oldValue) ) {
+                    if ( ! binding.oldValue || isEqual(binding.value, binding.oldValue) ) {
                         return;
                     }
 
-                    //If value has been reseted, or empty object has been given
-                    if ( value === null || typeof value == 'object' && Object.keys(value).length == 0 ) {
+                    //If value has been reseted
+                    if ( binding.value === null ) {
                         resetsForm.resetForm($(el));
                     }
 
@@ -538,7 +565,7 @@ var autoAjax = {
                     else {
                         var options = autoAjax.core.getFormOptions(el);
 
-                        bindForm.bindRow(el, value||{}, options);
+                        bindForm.bindRow(el, binding.value||{}, options);
                     }
                 }
             });
