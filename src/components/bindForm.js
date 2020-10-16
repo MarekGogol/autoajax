@@ -36,8 +36,6 @@ var bindForm = {
             for ( var key in data ) {
                 var input = (parent||form).find('*[name="'+key+'"]');
 
-                // console.log(key, input);
-
                 if ( (!data[key] || data[key].length == 0) && (data[key] !== false && data[key] !== 0) ) {
                     continue;
                 }
