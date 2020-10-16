@@ -487,12 +487,22 @@ var autoAjax = {
     },
 
     /**
-     * Vuejs 3 callback
+     * Vuejs 2/3 callback
      */
     onMounted(callback){
         return {
             bind : callback,
             mounted : callback,
+        };
+    },
+
+    /**
+     * Vuejs 2/3 callback
+     */
+    onUpdated(callback){
+        return {
+            update : callback,
+            updated : callback,
         };
     },
 
@@ -516,19 +526,18 @@ var autoAjax = {
                 //Set vnode of element
                 el.vnode = vnode;
 
-
                 autoAjax.tryNextTick(vnode, () => {
                     $(el).autoAjax(mergedOptions);
                 });
             }),
-            update(el, binding, vnode) {
+            ...autoAjax.onUpdated((el, binding, vnode) => {
                 //If value has not been changed
                 if ( ! binding.oldValue || isEqual(binding.value, binding.oldValue) ) {
                     return;
                 }
 
                 el.autoAjaxOptions = autoAjax.core.mergeOptions(el.autoAjaxOptions, binding.value||{})
-            }
+            })
         });
 
         Vue.directive('autoReset', {
@@ -550,9 +559,9 @@ var autoAjax = {
                         }
                     });
                 }),
-                update(el, binding, vnode) {
+                ...autoAjax.onUpdated((el, binding, vnode) => {
                     //If row does not have previous value
-                    if ( ! binding.oldValue || isEqual(binding.value, binding.oldValue) ) {
+                    if ( isEqual(binding.value, binding.oldValue) ) {
                         return;
                     }
 
@@ -567,7 +576,7 @@ var autoAjax = {
 
                         bindForm.bindRow(el, binding.value||{}, options);
                     }
-                }
+                })
             });
 
         })
@@ -592,6 +601,7 @@ $.fn.autoAjax = function(options){
 
         //Bind given row data and datepicker
         resetsForm.init(this);
+        bindForm.init(this);
 
         autoSave.formAutoSave(this, this.autoAjaxOptions);
         bindForm.bindRow(this, null, this.autoAjaxOptions);

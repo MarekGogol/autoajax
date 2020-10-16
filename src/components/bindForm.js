@@ -1,12 +1,32 @@
-var autoSave = require('./autoSave').default;
+var observeDOM = require('./observeDOM').default,
+    autoSave = require('./autoSave').default;
 
 var bindForm = {
+    init(form){
+        observeDOM(form, (mutations) => {
+            //If form has not been binded yet
+            if ( !form._bindRow ){
+                return;
+            }
+
+            //On every added element, fire bindRow method
+            for ( var i = 0; i < mutations.length; i++ ){
+                let mutation = mutations[i];
+
+                mutation.addedNodes.forEach(element => {
+                    this.bindRow(form, ...form._bindRow, $(element).parent());
+                });
+            }
+        })
+    },
     /**
      * Automatically bind form values from data-row attribute
      *
      * @param  object/json  obj
      */
-    bindRow : function(form, obj, options){
+    bindRow : function(form, obj, options, parent){
+        form._bindRow = [obj, options];
+
         var data = obj||options.row||$(form).attr('data-row')||autoSave.getFormData(form, options);
             form = $(form);
 
@@ -14,7 +34,9 @@ var bindForm = {
             var data = typeof data == 'string' ? $.parseJSON(data) : data;
 
             for ( var key in data ) {
-                var input = form.find('*[name="'+key+'"]');
+                var input = (parent||form).find('*[name="'+key+'"]');
+
+                // console.log(key, input);
 
                 if ( (!data[key] || data[key].length == 0) && (data[key] !== false && data[key] !== 0) ) {
                     continue;
