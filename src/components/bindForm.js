@@ -14,7 +14,7 @@ var bindForm = {
                 let mutation = mutations[i];
 
                 mutation.addedNodes.forEach(element => {
-                    this.bindRow(form, ...form._bindRow, $(element).parent());
+                    this.bindRow(form, ...form._bindRow, $(element));
                 });
             }
         })
@@ -24,7 +24,7 @@ var bindForm = {
      *
      * @param  object/json  obj
      */
-    bindRow : function(form, obj, options, parent){
+    bindRow : function(form, obj, options, changedNode){
         form._bindRow = [obj, options];
 
         var data = obj||options.row||$(form).attr('data-row')||autoSave.getFormData(form, options);
@@ -34,7 +34,13 @@ var bindForm = {
             var data = typeof data == 'string' ? $.parseJSON(data) : data;
 
             for ( var key in data ) {
-                var input = (parent||form).find('*[name="'+key+'"]');
+                var input;
+
+                if ( changedNode ) {
+                    input = changedNode.is('[name="'+key+'"]') ? changedNode : changedNode.find('*[name="'+key+'"]');
+                } else {
+                    input = form.find('*[name="'+key+'"]');
+                }
 
                 if ( (!data[key] || data[key].length == 0) && (data[key] !== false && data[key] !== 0) ) {
                     continue;
