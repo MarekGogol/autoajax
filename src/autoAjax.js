@@ -445,8 +445,8 @@ var autoAjax = {
         setLoading(element, status){
             let props = element.vnode && element.vnode.data ? element.vnode.data.on : element.vnode.props;
 
-            if ( props && props.loading ) {
-                props.loading(status);
+            if ( props && (props.loading||props.onLoading) ) {
+                props[props.loading ? 'loading' : 'onLoading'](status);
             }
         },
         /*
