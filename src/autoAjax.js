@@ -443,6 +443,10 @@ var autoAjax = {
          * Set loading status of form
          */
         setLoading(element, status){
+            if ( !element.vnode ){
+                return;
+            }
+
             let props = element.vnode && element.vnode.data ? element.vnode.data.on : element.vnode.props;
 
             if ( props && (props.loading||props.onLoading) ) {
