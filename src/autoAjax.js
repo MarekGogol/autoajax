@@ -305,7 +305,10 @@ var autoAjax = {
         setErrorMessage : function(form, key, message, obj){
             var options = autoAjax.core.getFormOptions(form),
                 errorElement = options.getErrorMessageElement(message, key, form),
-                errorInputs = form.find('input[name="'+key+'"], select[name="'+key+'"], textarea[name="'+key+'"]')
+                errorInputs = form.find([
+                    'input[name="'+key+'"], select[name="'+key+'"], textarea[name="'+key+'"]',
+                    'input[name="'+key+'[]"], select[name="'+key+'[]"], textarea[name="'+key+'[]"]',
+                ].join(', '))
 
             //Scroll on first error element
             if ( options.scrollOnErrorInput === true && errorInputs.length > 0 ) {
@@ -315,28 +318,34 @@ var autoAjax = {
             //Add error message element after imput
             if ( options.showInputErrors === true ) {
                 errorInputs.each(function(){
-                    var addAfter = options.addErrorMessageAfterElement( $(this) ),
-                        nextElement = addAfter.next()[0];
+                    var addAfterElement = options.addErrorMessageAfterElement( $(this) ),
+                        addAfterElement = Array.isArray(addAfterElement) ? addAfterElement : [ addAfterElement ];
 
-                    //If input does not has bffer
-                    if ( ! this._addedErrorMesageIntoInput ) {
-                        this._addedErrorMesageIntoInput = [];
+                    for ( var i = 0; i < addAfterElement.length; i++ ) {
+                        let addAfter = addAfterElement[i],
+                            nextElement = addAfter.next()[0];
+
+                        //If input does not has bffer
+                        if ( ! this._addedErrorMesageIntoInput ) {
+                            this._addedErrorMesageIntoInput = [];
+                        }
+
+                        //If error message has not been already added on this place
+                        if ( !nextElement || nextElement.outerHTML !== errorElement ) {
+                            addAfter.after(errorElement);
+                        }
+
+                        //Add error message into buffer of actual input
+                        this._addedErrorMesageIntoInput.push(addAfter.next()[0]);
+
+                        //If form does not have stack with error messages
+                        if ( ! form[0]._addedErrorMessages ) {
+                            form[0]._addedErrorMessages = [];
+                        }
+
+                        form[0]._addedErrorMessages.push(addAfter.next()[0]);
                     }
 
-                    //If error message has not been already added on this place
-                    if ( !nextElement || nextElement.outerHTML !== errorElement ) {
-                        addAfter.after(errorElement);
-                    }
-
-                    //Add error message into buffer of actual input
-                    this._addedErrorMesageIntoInput.push(addAfter.next()[0]);
-
-                    //If form does not have stack with error messages
-                    if ( ! form[0]._addedErrorMessages ) {
-                        form[0]._addedErrorMessages = [];
-                    }
-
-                    form[0]._addedErrorMessages.push(addAfter.next()[0]);
                 });
             }
 
@@ -345,21 +354,28 @@ var autoAjax = {
                 //If input changes, remove errors
                 .on('keyup change', function(e){
                     //On tab and esc does not remove errors
-                    if ( [13, 9].indexOf(e.keyCode) > -1 ) {
+                    if ( e.keyCode && [13, 9].indexOf(e.keyCode) > -1 ) {
                         return;
                     }
 
-                    //Remove all input messages
-                    if ( this._addedErrorMesageIntoInput ) {
-                        for ( var i = 0; i < this._addedErrorMesageIntoInput.length; i++ ) {
-                            this._addedErrorMesageIntoInput[i].remove();
+                    //We want remove all errors for input on multiple places. For example multiple checkbox.
+                    errorInputs.each(function(){
+                        //Remove all input messages
+                        if ( this._addedErrorMesageIntoInput ) {
+                            for ( var i = 0; i < this._addedErrorMesageIntoInput.length; i++ ) {
+                                this._addedErrorMesageIntoInput[i].remove();
+                            }
+
+                            //Reset array
+                            this._addedErrorMesageIntoInput = [];
                         }
 
-                        //Reset array
-                        this._addedErrorMesageIntoInput = [];
-                    }
+                        //Remove parent error class
+                        options.getInputParentWrapper(
+                            $(this)).removeClass(autoAjax.core.getClass('inputWrapperErrorClass', form, true)
+                        );
+                    });
 
-                    options.getInputParentWrapper($(this)).removeClass(autoAjax.core.getClass('inputWrapperErrorClass', form, true));
                 });
 
 
