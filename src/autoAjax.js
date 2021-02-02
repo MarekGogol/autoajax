@@ -469,6 +469,19 @@ var autoAjax = {
                 props[props.loading ? 'loading' : 'onLoading'](status);
             }
         },
+        getFormKeyIndex(formKeys, key){
+            var index;
+
+            //Find basic key, or multiple field name[]
+            index = formKeys.indexOf(key);
+            index = index == -1 ? formKeys.indexOf(key+'[]') : index;
+            if ( index !== -1 ){
+                return index;
+            }
+
+            //If field has not been found, we want scroll to this field at the last position
+            return 9999;
+        },
         /*
          * Get keys from request in correct order by fields position in form
          */
@@ -476,10 +489,11 @@ var autoAjax = {
             var formKeys = form.find('input[name], textarea[name], select[name]')
                                .toArray()
                                .map(field => field.name)
-                               .filter(name => name),
-                newObjectKeys = Object.keys(obj||[]).sort((a, b) => {
-                    return formKeys.indexOf(a) - formKeys.indexOf(b);
-                });
+                               .filter(name => name);
+
+            var newObjectKeys = Object.keys(obj||[]).sort((a, b) => {
+                return this.getFormKeyIndex(formKeys, a) - this.getFormKeyIndex(formKeys, b);
+            });
 
             return newObjectKeys;
         }
