@@ -258,46 +258,59 @@ var autoAjax = {
         /*
          * Scroll on wrong input field an select it
          */
-        scrollOnWrongInput(element, form, options){
-            if ( element.length == 0 || form[0].scrolledOnWrongInput === true ) {
-                return;
-            }
+        scrollOnWrongInput(elements, form, options){
+            //We want support scroll on one of the multiple visible error element indicators
+            for ( let i = 0; i < elements.length; i++ ) {
+                let element = elements[i];
 
-            var top = this.getFieldScrollPosition(element, options),
-                activeElement = document.activeElement,
-                isHidden = element.is(':hidden');
-
-            //We does not want scrool if element is hidden
-            if ( top <= 0 || isHidden ) {
-                var parent = element.parent();
-
-                //If field is hidden and parent group is visible
-                if ( isHidden && parent.is(':visible') ) {
-                    top = this.getFieldScrollPosition(parent, options);
+                if ( element.length == 0 || form[0].scrolledOnWrongInput === true ) {
+                    continue;
                 }
 
-                //If field does not have visible parent
-                else {
-                    form[0].scrolledOnWrongInput = true;
-                    return;
+                var top = this.getFieldScrollPosition(element, options),
+                    activeElement = document.activeElement,
+                    isHidden = element.is(':hidden');
+
+                //We does not want scrool if element is hidden
+                if ( top <= 0 || isHidden ) {
+                    var parent = element.parent();
+
+                    //If field is hidden and parent group is visible
+                    if ( isHidden && parent.is(':visible') ) {
+                        top = this.getFieldScrollPosition(parent, options);
+                    }
+
+                    //If field does not have visible parent
+                    else {
+                        continue;
+                    }
                 }
+
+                form[0].scrolledOnWrongInput = true;
+
+                //Scroll on wrong input
+                $('html, body').animate({
+                    scrollTop: top,
+                }, options.errorInputScrollSpeed);
+
+                //Focus wrong text inputs
+                if (
+                    options.focusWrongTextInput === true //If we can focus error inputs
+                    && ['text', 'email', 'number', 'phone', 'date', 'password', 'range', 'checkbox'].indexOf(element.attr('type')) > -1 //If is text input
+                    && !(activeElement && (activeElement._addedErrorMesageIntoInput||[]).length > 0) //If is not select error input already
+                ) {
+                    element.focus()
+                }
+
+                break;
             }
 
             form[0].scrolledOnWrongInput = true;
+        },
+        getErrorInputElement(options, element){
+            let addAfterElement = options.addErrorMessageAfterElement(element);
 
-            //Scroll on wrong input
-            $('html, body').animate({
-                scrollTop: top,
-            }, options.errorInputScrollSpeed);
-
-            //Focus wrong text inputs
-            if (
-                options.focusWrongTextInput === true //If we can focus error inputs
-                && ['text', 'email', 'number', 'phone', 'date', 'password', 'range', 'checkbox'].indexOf(element.attr('type')) > -1 //If is text input
-                && !(activeElement && (activeElement._addedErrorMesageIntoInput||[]).length > 0) //If is not select error input already
-            ) {
-                element.focus()
-            }
+            return Array.isArray(addAfterElement) ? addAfterElement : [ addAfterElement ];
         },
         /*
          * Set input error message
@@ -312,14 +325,19 @@ var autoAjax = {
 
             //Scroll on first error element
             if ( options.scrollOnErrorInput === true && errorInputs.length > 0 ) {
-                this.scrollOnWrongInput(errorInputs.eq(0), form, options);
+                let addAfterElement = this.getErrorInputElement(options, errorInputs.eq(0));
+
+                this.scrollOnWrongInput(
+                    addAfterElement,
+                    form,
+                    options
+                );
             }
 
             //Add error message element after imput
             if ( options.showInputErrors === true ) {
                 errorInputs.each(function(){
-                    var addAfterElement = options.addErrorMessageAfterElement( $(this) ),
-                        addAfterElement = Array.isArray(addAfterElement) ? addAfterElement : [ addAfterElement ];
+                    var addAfterElement = autoAjax.core.getErrorInputElement(options, $(this));
 
                     for ( var i = 0; i < addAfterElement.length; i++ ) {
                         let addAfter = addAfterElement[i],
