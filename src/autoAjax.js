@@ -608,6 +608,13 @@ var autoAjax = {
 
                         if ( binding.value ) {
                             bindForm.bindRow(el, binding.value, options);
+
+                            //Bind form also second time after 100ms, because Vuejs may not be ready yet. So we may try bind again...
+                            //This happens when in form we have sub components with slots. (2 nested slots),
+                            //then value in slot will not be ready on mounted state.
+                            setTimeout(() => {
+                                bindForm.bindRow(el, binding.value, options);
+                            }, 50);
                         }
                     });
                 }),
