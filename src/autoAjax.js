@@ -68,6 +68,14 @@ var autoAjax = {
             return input.parent();
         },
 
+        //Find form keys by
+        findFormField(form, key){
+            return form.find([
+                'input[name="'+key+'"], select[name="'+key+'"], textarea[name="'+key+'"]',
+                'input[name="'+key+'[]"], select[name="'+key+'[]"], textarea[name="'+key+'[]"]',
+            ].join(', '))
+        },
+
         //Global callback events for every form, such as validation, error handling etc...
         globalEvents : {
             success : [

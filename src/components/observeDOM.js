@@ -1,6 +1,6 @@
 var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
-var observeDOM = function(obj, originalCallback){
+var observeDOM = function(obj, originalCallback, options = { childList:true, subtree:true }){
     if( !obj || !obj.nodeType === 1 )
         return;
 
@@ -21,12 +21,18 @@ var observeDOM = function(obj, originalCallback){
             callback(mutations);
         })
         // have the observer observe foo for changes in children
-        obs.observe( obj, { childList:true, subtree:true });
+        obs.observe( obj, options);
     }
 
     else if( window.addEventListener ){
-        obj.addEventListener('DOMNodeInserted', callback, false);
-        obj.addEventListener('DOMNodeRemoved', callback, false);
+        if ( options.childList || options.subtree ) {
+            obj.addEventListener('DOMNodeInserted', callback, false);
+            obj.addEventListener('DOMNodeRemoved', callback, false);
+        }
+
+        if ( options.attributes ) {
+            obj.addEventListener('DOMAttrModified', callback, false);
+        }
     }
 }
 

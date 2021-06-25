@@ -1,10 +1,20 @@
+const observeDOM = require('./observeDOM').default;
+
 class errorMessage {
     constructor(autoAjax, options, form, key, message){
         this.autoAjax = autoAjax;
         this.form = form;
-        this.key = key;
         this.message = message;
         this.options = options;
+        this.key = this.getParsedKey(key);
+    }
+
+    getParsedKey(key){
+        key = key.split('.').map((value, index) => {
+            return index == 0 ? value : '['+value+']';
+        }).join('');
+
+        return key;
     }
 
     getErrorInputElement(options, element){
@@ -22,10 +32,7 @@ class errorMessage {
             form = this.form,
             autoAjax = this.autoAjax;
 
-        var errorInputs = form.find([
-                'input[name="'+key+'"], select[name="'+key+'"], textarea[name="'+key+'"]',
-                'input[name="'+key+'[]"], select[name="'+key+'[]"], textarea[name="'+key+'[]"]',
-            ].join(', '))
+        var errorInputs = options.findFormField(form, key);
 
         //Scroll on first error element
         if ( options.scrollOnErrorInput === true && errorInputs.length > 0 ) {
@@ -58,6 +65,7 @@ class errorMessage {
         }
 
         let form = this.form,
+            key = this.key,
             errorElement = options.getErrorMessageElement(this.message, this.key, form),
             _this = this;
 
@@ -92,8 +100,7 @@ class errorMessage {
     }
 
     handleErrorInputChange(errorInputs, options){
-        let autoAjax = this.autoAjax,
-            form = this.form;
+        let _this = this;
 
         //If input changes, remove errors
         errorInputs.on('keyup change', function(e){
@@ -102,24 +109,40 @@ class errorMessage {
                 return;
             }
 
-            //We want remove all errors for input on multiple places. For example multiple checkbox.
-            errorInputs.each(function(){
-                //Remove all input messages
-                if ( this._addedErrorMesageIntoInput ) {
-                    for ( var i = 0; i < this._addedErrorMesageIntoInput.length; i++ ) {
-                        this._addedErrorMesageIntoInput[i].remove();
-                    }
+            _this.removeErrorMessages(errorInputs);
+        });
 
-                    //Reset array
-                    this._addedErrorMesageIntoInput = [];
+        //Vuejs support, when :value has been changed, but event has not been dispatched
+        observeDOM(errorInputs[0], (mutations) => {
+            let diffMutations = mutations.filter(mutation => mutation.attributeName == 'value' && errorInputs[0].value != mutation.oldValue);
+
+            if ( diffMutations.length > 0 ) {
+                this.removeErrorMessages(errorInputs);
+            }
+        }, { attributes : true, attributeOldValue : true })
+    }
+
+    removeErrorMessages(errorInputs) {
+        var options = this.options,
+            form = this.form,
+            autoAjax = this.autoAjax;
+
+        //We want remove all errors for input on multiple places. For example multiple checkbox.
+        errorInputs.each(function(){
+            //Remove all input messages
+            if ( this._addedErrorMesageIntoInput ) {
+                for ( var i = 0; i < this._addedErrorMesageIntoInput.length; i++ ) {
+                    this._addedErrorMesageIntoInput[i].remove();
                 }
 
-                //Remove parent error class
-                options.getInputParentWrapper(
-                    $(this)).removeClass(autoAjax.core.getClass('inputWrapperErrorClass', form, true)
-                );
-            });
+                //Reset array
+                this._addedErrorMesageIntoInput = [];
+            }
 
+            //Remove parent error class
+            options.getInputParentWrapper(
+                $(this)).removeClass(autoAjax.core.getClass('inputWrapperErrorClass', form, true)
+            );
         });
     }
 
