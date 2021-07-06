@@ -70,10 +70,23 @@ var autoAjax = {
 
         //Find form keys by
         findFormField(form, key){
-            return form.find([
+            let selectors = [
                 'input[name="'+key+'"], select[name="'+key+'"], textarea[name="'+key+'"]',
                 'input[name="'+key+'[]"], select[name="'+key+'[]"], textarea[name="'+key+'[]"]',
-            ].join(', '))
+            ].join(', ');
+
+            var formId = form.attr('id'),
+                //Find input in existing form
+                input = form.find(selectors);
+
+            if ( input.length == 0 && formId ){
+                //Find input in whole document, assigned to form elsewhere in document by form="" attribute
+                input = $(document).find(selectors).filter(function(){
+                    return this.getAttribute('form') == formId;
+                });
+            }
+
+            return input;
         },
 
         //Global callback events for every form, such as validation, error handling etc...
