@@ -68,7 +68,9 @@ var autoSave = {
                     data = {};
 
                 for ( var key in formData ) {
-                    data[formData[key].name] = formData[key].value;
+                    if ( (options.autoSaveSkip||[]).indexOf(formData[key].name) == -1 ) {
+                        data[formData[key].name] = formData[key].value;
+                    }
                 }
 
                 storage.put(formPath, data);

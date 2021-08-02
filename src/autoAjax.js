@@ -14,6 +14,9 @@ var autoAjax = {
         //Automatically save all unsaved form changed
         autoSave : false,
 
+        //Skip fields from autosave
+        autoSaveSkip : ['g-recaptcha-response'],
+
         //Automaticaly add validation error messages after each bad filled input
         showInputErrors : true,
 
