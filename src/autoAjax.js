@@ -461,7 +461,10 @@ var autoAjax = {
                 autoAjax.tryNextTick(vnode, () => {
                     el.autoAjaxOptions.autoReset = true
                 });
-            })
+            }),
+            ...autoAjax.onUpdated((el, binding, vnode) => {
+                el.autoAjaxOptions.autoReset = binding.value ? true : false;
+            }),
         });
 
         ['autoAjaxRow', 'bindRow', 'row'].forEach(key => {
