@@ -463,7 +463,9 @@ var autoAjax = {
                 });
             }),
             ...autoAjax.onUpdated((el, binding, vnode) => {
-                el.autoAjaxOptions.autoReset = binding.value ? true : false;
+                if ( el.autoAjaxOptions ) {
+                    el.autoAjaxOptions.autoReset = binding.value ? true : false;
+                }
             }),
         });
 
