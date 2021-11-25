@@ -23,6 +23,12 @@ class errorMessage {
         return Array.isArray(addAfterElement) ? addAfterElement : [ addAfterElement ];
     }
 
+    getInputParentElementsWrappers(options, input){
+        let addAfterElement = options.getInputParentWrapper(input);
+
+        return Array.isArray(addAfterElement) ? addAfterElement : [ addAfterElement ];
+    }
+
     /*
      * Set input error message
      */
@@ -30,7 +36,8 @@ class errorMessage {
         let options = this.options,
             key = this.key,
             form = this.form,
-            autoAjax = this.autoAjax;
+            autoAjax = this.autoAjax,
+            _this = this;
 
         var errorInputs = options.findFormField(form, key);
 
@@ -53,9 +60,11 @@ class errorMessage {
 
         //Add error class on input wrapper
         errorInputs.each(function(){
-            options.getInputParentWrapper($(this)).addClass(
-                autoAjax.core.getClass('inputWrapperErrorClass', form, true)
-            );
+            _this.getInputParentElementsWrappers(options, $(this)).forEach(element => {
+                element.addClass(
+                    autoAjax.core.getClass('inputWrapperErrorClass', form, true)
+                );
+            });
         });
     }
 
@@ -125,7 +134,8 @@ class errorMessage {
     removeErrorMessages(errorInputs) {
         var options = this.options,
             form = this.form,
-            autoAjax = this.autoAjax;
+            autoAjax = this.autoAjax,
+            _this = this;
 
         //We want remove all errors for input on multiple places. For example multiple checkbox.
         errorInputs.each(function(){
@@ -140,9 +150,9 @@ class errorMessage {
             }
 
             //Remove parent error class
-            options.getInputParentWrapper(
-                $(this)).removeClass(autoAjax.core.getClass('inputWrapperErrorClass', form, true)
-            );
+            _this.getInputParentElementsWrappers(options, $(this)).forEach(element => {
+                element.removeClass(autoAjax.core.getClass('inputWrapperErrorClass', form, true))
+            });
         });
     }
 
