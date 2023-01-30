@@ -1,10 +1,10 @@
-var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-
 var observeDOM = function(obj, originalCallback, options = { childList:true, subtree:true }){
-    if( !obj || !obj.nodeType === 1 )
+    if( !obj || !obj.nodeType === 1 ) {
         return;
+    }
 
     var timeout,
+        MutationObserver = window.MutationObserver || window.WebKitMutationObserver,
         callback = (mutations) => {
             if ( timeout ) {
                 clearTimeout(timeout);

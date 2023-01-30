@@ -1,5 +1,5 @@
-var observeDOM = require('./observeDOM').default,
-    bindForm = require('./bindForm').default;
+import observeDOM from './observeDOM';
+import bindForm from './bindForm';
 
 var resetsForm = {
     init(form){

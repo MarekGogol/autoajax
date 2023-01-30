@@ -1,4 +1,4 @@
-var storage = require('./storage').default;
+import storage from './storage';
 
 var autoSave = {
     getXPathForElement(el, disableIDEngine) {

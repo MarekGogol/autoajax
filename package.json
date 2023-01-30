@@ -1,6 +1,6 @@
 {
   "name": "autoajax",
-  "version": "1.0.31",
+  "version": "2.0.0",
   "description": "AutoAjax form library for sending forms and automaticall laravel validation.",
   "main": "src/index.js",
   "scripts": {
@@ -10,13 +10,13 @@
   "author": "Marek Gogoľ <info@marekgogol.sk>",
   "license": "MIT",
   "dependencies": {
-    "jquery-form": "^3.50.0",
+    "jquery-form": "^4.3.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.isequal": "^4.5.0"
   },
   "devDependencies": {
     "cross-env": "^5.1",
     "laravel-mix": "^4.0.7",
-    "vue-template-compiler": "^2.6.10"
+    "vue-template-compiler": "^2.7.14"
   }
 }

@@ -1,5 +1,5 @@
-var observeDOM = require('./observeDOM').default,
-    autoSave = require('./autoSave').default;
+import observeDOM from './observeDOM';
+import autoSave from './autoSave';
 
 var bindForm = {
     init(form){

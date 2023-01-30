@@ -1,5 +1,11 @@
-require('jquery-form/jquery.form.js');
+import jqueryForm from 'jquery-form';
 
-var autoAjax = require('./autoAjax.js').default;
+if ( typeof window !== 'undefined' ) {
+    jqueryForm(window, window.$);
 
-module.exports = autoAjax;
+    autoAjax.jQueryDirective(window);
+}
+
+import autoAjax from './autoAjax.js';
+
+export default autoAjax;

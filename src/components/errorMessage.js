@@ -1,4 +1,4 @@
-const observeDOM = require('./observeDOM').default;
+import observeDOM from './observeDOM';
 
 class errorMessage {
     constructor(autoAjax, options, form, key, message){

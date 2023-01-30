@@ -1,10 +1,9 @@
-const cloneDeep = require('lodash.clonedeep'),
-      isEqual = require('lodash.isequal');
-
-var resetsForm = require('./components/resetsForm').default,
-    bindForm = require('./components/bindForm').default,
-    errorMessage = require('./components/errorMessage').default,
-    autoSave = require('./components/autoSave').default;
+import cloneDeep from 'lodash.clonedeep';
+import isEqual from 'lodash.isequal';
+import resetsForm from './components/resetsForm';
+import bindForm from './components/bindForm';
+import errorMessage from './components/errorMessage';
+import autoSave from './components/autoSave';
 
 var autoAjax = {
     options : {
@@ -509,71 +508,73 @@ var autoAjax = {
 
         })
     },
-}
-
-/**
- * Install package as jQuery plugin
- */
-$.fn.autoAjax = function(options){
-    return $(this).each(function(){
-        //If form has been initialized already
-        if ( this.autoAjaxOptions )
+    jQueryDirective(_window){
+        if ( !_window || !(typeof _window == 'object') ){
             return;
+        }
 
-        var defaultOptions = cloneDeep(autoAjax.options);
+        _window.$.fn.autoAjax = function(options){
+            return $(this).each(function(){
+                //If form has been initialized already
+                if ( this.autoAjaxOptions )
+                    return;
 
-        //Bind ajax options into exact form
-        this.autoAjaxOptions = Object.assign(autoAjax.core.mergeOptions(defaultOptions, options), {
-            status : 'ready',
-        });
+                var defaultOptions = cloneDeep(autoAjax.options);
 
-        //Bind given row data and datepicker
-        resetsForm.init(this);
-        bindForm.init(this);
+                //Bind ajax options into exact form
+                this.autoAjaxOptions = Object.assign(autoAjax.core.mergeOptions(defaultOptions, options), {
+                    status : 'ready',
+                });
 
-        autoSave.formAutoSave(this, this.autoAjaxOptions);
-        bindForm.bindRow(this, null, this.autoAjaxOptions);
-        bindForm.bindDatepickers(this);
+                //Bind given row data and datepicker
+                resetsForm.init(this);
+                bindForm.init(this);
 
-        /*
-         * After submit form
-         */
-        $(this).submit(function(){
-            //Disable send form twice
-            if ( this.autoAjaxOptions.status === 'sending' )
-                return false;
+                autoSave.formAutoSave(this, this.autoAjaxOptions);
+                bindForm.bindRow(this, null, this.autoAjaxOptions);
+                bindForm.bindDatepickers(this);
 
-            var form = $(this);
+                /*
+                 * After submit form
+                 */
+                $(this).submit(function(){
+                    //Disable send form twice
+                    if ( this.autoAjaxOptions.status === 'sending' )
+                        return false;
 
-            this.autoAjaxOptions.status = 'sending';
+                    var form = $(this);
 
-            autoAjax.core.setLoading(this, true);
+                    this.autoAjaxOptions.status = 'sending';
 
-            this.scrolledOnWrongInput = false;
+                    autoAjax.core.setLoading(this, true);
 
-            //Fire submit event
-            autoAjax.core.fireEventsOn([
-                this.autoAjaxOptions.submit,
-                this.autoAjaxOptions.onSubmit
-            ], [form]);
+                    this.scrolledOnWrongInput = false;
 
-            autoAjax.core.resetErrors(form);
+                    //Fire submit event
+                    autoAjax.core.fireEventsOn([
+                        this.autoAjaxOptions.submit,
+                        this.autoAjaxOptions.onSubmit
+                    ], [form]);
 
-            form.ajaxSubmit({
-              url: form.attr('data-action'),
-              success: (data, type, response) => autoAjax.core.ajaxResponse(response, form),
-              error: response => autoAjax.core.ajaxResponse(response, form),
+                    autoAjax.core.resetErrors(form);
+
+                    form.ajaxSubmit({
+                      url: form.attr('data-action'),
+                      success: (data, type, response) => autoAjax.core.ajaxResponse(response, form),
+                      error: response => autoAjax.core.ajaxResponse(response, form),
+                    });
+
+                    return false;
+                });
+
+                //Fire autoAjax init event
+                autoAjax.core.fireEventsOn([
+                    this.autoAjaxOptions.create,
+                    this.autoAjaxOptions.onCreate,
+                ], [$(this)]);
             });
-
-            return false;
-        });
-
-        //Fire autoAjax init event
-        autoAjax.core.fireEventsOn([
-            this.autoAjaxOptions.create,
-            this.autoAjaxOptions.onCreate,
-        ], [$(this)]);
-    });
-};
+        };
+    }
+}
 
 export default autoAjax;
