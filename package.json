@@ -11,8 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "jquery-form": "^4.3.0",
-    "lodash.clonedeep": "^4.5.0",
-    "lodash.isequal": "^4.5.0"
+    "lodash": "^4.5.0",
   },
   "devDependencies": {
     "cross-env": "^5.1",

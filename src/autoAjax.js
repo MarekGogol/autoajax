@@ -1,5 +1,4 @@
-import cloneDeep from 'lodash.clonedeep';
-import isEqual from 'lodash.isequal';
+import {cloneDeep, isEqual} from 'lodash';
 import resetsForm from './components/resetsForm';
 import bindForm from './components/bindForm';
 import errorMessage from './components/errorMessage';
