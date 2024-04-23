@@ -196,7 +196,7 @@ var autoAjax = {
             //Remove input wrapper class
             form.querySelectorAll(selector).forEach(wrapper => {
                 classes.forEach(c => {
-                    wrapper.classList.remove(c);
+                    wrapper.classList.remove(c.replace('.', ''));
                 });
             })
         },
@@ -517,8 +517,6 @@ var autoAjax = {
                         this.autoAjaxOptions.submit,
                         this.autoAjaxOptions.onSubmit
                     ], [form]);
-
-                    // autoAjax.core.resetErrors(form);
 
                     // form.ajaxSubmit({
                     //   url: form.attr('action') || form.attr('data-action'),
