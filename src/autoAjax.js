@@ -558,7 +558,7 @@ var autoAjax = {
                     autoAjax.core.resetErrors(form);
 
                     form.ajaxSubmit({
-                      url: form.attr('data-action'),
+                      url: form.attr('action') || form.attr('data-action'),
                       success: (data, type, response) => autoAjax.core.ajaxResponse(response, form),
                       error: response => autoAjax.core.ajaxResponse(response, form),
                     });
