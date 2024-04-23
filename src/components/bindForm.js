@@ -53,8 +53,13 @@ var bindForm = {
     triggerChangeEvent(input){
         input.each(function(){
             $(this).change().trigger("chosen:updated");
-            this.dispatchEvent(new Event('input', { 'bubbles': true }))
-            this.dispatchEvent(new Event('change', { 'bubbles': true }))
+
+            //Fix labels
+            this.focus();
+            this.blur();
+
+            this.dispatchEvent(new Event('input', { 'bubbles': true }));
+            this.dispatchEvent(new Event('change', { 'bubbles': true }));
         })
     },
     /**
