@@ -94,11 +94,7 @@ var autoAjax = {
 
                     //Reset form on success message if has autoReset class
                     if ( canResetForm && !('error' in response) ) {
-                        var resetItems = resetsForm.resetForm(form);
-
-                        console.log(resetItems);
-
-                        // bindForm.triggerChangeEvent(resetItems);
+                        resetsForm.resetForm(form);
                     }
 
                     //Does not process success events if returned data is not object type
