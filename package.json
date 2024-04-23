@@ -10,7 +10,6 @@
   "author": "Marek Gogoľ <info@marekgogol.sk>",
   "license": "MIT",
   "dependencies": {
-    "jquery-form": "^4.3.0",
     "lodash": "^4.5.0"
   },
   "devDependencies": {
