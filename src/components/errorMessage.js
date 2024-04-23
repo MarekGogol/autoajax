@@ -45,12 +45,11 @@ export default class ErrorMessage {
         if ( options.scrollOnErrorInput === true && errorInputs.length > 0 ) {
             let addAfterElement = this.getErrorInputElement(options, errorInputs[0]);
 
-            //TODO:
-            // this.scrollOnWrongInput(
-            //     addAfterElement,
-            //     form,
-            //     options
-            // );
+            this.scrollOnWrongInput(
+                errorInputs,
+                form,
+                options
+            );
         }
 
         //Add error message element after imput
@@ -164,66 +163,84 @@ export default class ErrorMessage {
     /*
      * Scroll on wrong input field an select it
      */
-    // scrollOnWrongInput(elements, form, options){
-    //     //We want support scroll on one of the multiple visible error element indicators
-    //     for ( let i = 0; i < elements.length; i++ ) {
-    //         let element = elements[i];
+    scrollOnWrongInput(elements, form, options){
+        //We want support scroll on one of the multiple visible error element indicators
+        for ( let i = 0; i < elements.length; i++ ) {
+            let element = elements[i];
 
-    //         if ( element.length == 0 || form[0].scrolledOnWrongInput === true ) {
-    //             continue;
-    //         }
+            if ( form.scrolledOnWrongInput === true ) {
+                continue;
+            }
 
-    //         var top = this.getFieldScrollPosition(element, options),
-    //             activeElement = document.activeElement,
-    //             isHidden = element.is(':hidden');
+            const isVisible = (el) => {
+                return el.checkVisibility({opacityProperty: true, visibilityProperty : true});
+            }
 
-    //         //We does not want scrool if element is hidden
-    //         if ( top <= 0 || isHidden ) {
-    //             var parent = element.parent();
+            var top = this.getFieldScrollPosition(element, options),
+                activeElement = document.activeElement,
+                isHidden = !isVisible(element);
 
-    //             //If field is hidden and parent group is visible
-    //             if ( isHidden && parent.is(':visible') ) {
-    //                 top = this.getFieldScrollPosition(parent, options);
-    //             }
+            //We does not want scrool if element is hidden
+            if ( top <= 0 || isHidden ) {
+                var parent = element.parentElement;
 
-    //             //If field does not have visible parent
-    //             else {
-    //                 continue;
-    //             }
-    //         }
+                //If field is hidden and parent group is visible
+                if ( isHidden && isVisible(parent) ) {
+                    top = this.getFieldScrollPosition(parent, options);
+                }
 
-    //         form[0].scrolledOnWrongInput = true;
+                //If field does not have visible parent
+                else {
+                    continue;
+                }
+            }
 
-    //         //Scroll on wrong input
-    //         $('html, body').animate({
-    //             scrollTop: top,
-    //         }, options.errorInputScrollSpeed);
+            form.scrolledOnWrongInput = true;
 
-    //         //Focus wrong text inputs
-    //         if (
-    //             options.focusWrongTextInput === true //If we can focus error inputs
-    //             && ['text', 'email', 'number', 'phone', 'date', 'password', 'range', 'checkbox'].indexOf(element.attr('type')) > -1 //If is text input
-    //             && !(activeElement && (activeElement._addedErrorMesageIntoInput||[]).length > 0) //If is not select error input already
-    //         ) {
-    //             element.focus()
-    //         }
+            window.scrollTo({
+                top: top, behavior: 'smooth'
+            });
 
-    //         break;
-    //     }
+            //Focus wrong text inputs
+            if (
+                options.focusWrongTextInput === true //If we can focus error inputs
+                && ['text', 'email', 'number', 'phone', 'date', 'password', 'range', 'checkbox'].includes(element.getAttribute('type')) //If is text input
+                && !(activeElement && (activeElement._addedErrorMesageIntoInput||[]).length > 0) //If is not select error input already
+            ) {
+                element.focus()
+            }
 
-    //     form[0].scrolledOnWrongInput = true;
-    // }
+            break;
+        }
 
-    // getFieldScrollPosition(element, options){
-    //     var top = element.offset().top,
-    //         offset = options.errorInputScrollOffset;
+        form.scrolledOnWrongInput = true;
+    }
 
-    //     //Scroll offset can be dynamic function which returns number.
-    //     //Because sometimes for mobile version, we want other offset.
-    //     if ( typeof offset == 'function' ) {
-    //         offset = offset();
-    //     }
+    getFieldScrollPosition(element, options){
+        function getOffset(element){
+            if (!element.getClientRects().length)
+            {
+              return { top: 0, left: 0 };
+            }
 
-    //     return top > offset ? top - offset : top;
-    // }
+            let rect = element.getBoundingClientRect();
+            let win = element.ownerDocument.defaultView;
+            return (
+            {
+              top: rect.top + win.pageYOffset,
+              left: rect.left + win.pageXOffset
+            });
+        }
+
+        var top = getOffset(element).top,
+            offset = options.errorInputScrollOffset;
+
+        //Scroll offset can be dynamic function which returns number.
+        //Because sometimes for mobile version, we want other offset.
+        if ( typeof offset == 'function' ) {
+            offset = offset();
+        }
+
+        return top > offset ? top - offset : top;
+    }
 };
