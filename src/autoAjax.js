@@ -233,13 +233,14 @@ var autoAjax = {
         ajaxResponse(response, form)
         {
             var options = form.autoAjaxOptions,
-                finalResponse = [response.data, response, form];
+                finalResponse = [response?.data, response, form],
+                status = response?.status;
 
             //Set ajax status as done
             autoAjax.core.setLoading(form, false);
 
             //On success response
-            if ( [200, 201].includes(response.status) ) {
+            if ( [200, 201].includes(status) ) {
                 this.fireEventsOn([
                     options.success,
                     options.globalEvents.success
@@ -247,7 +248,7 @@ var autoAjax = {
             }
 
             //On validation error
-            else if ( [422, 403].includes(response.status) ) {
+            else if ( [422, 403].includes(status) ) {
                 this.fireEventsOn([
                     options.validation,
                     options.globalEvents.validation
