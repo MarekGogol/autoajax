@@ -117,7 +117,7 @@ var autoAjax = {
                 (data, response, form) => {},
             ],
             validation : [
-                (response, data, form) => {
+                (data, response, form) => {
                     var options = autoAjax.core.getFormOptions(form);
 
                     if ( response.status == 422 ) {
@@ -235,7 +235,7 @@ var autoAjax = {
         ajaxResponse(response, form)
         {
             var options = form.autoAjaxOptions,
-                finalResponse = [response, response.data, form];
+                finalResponse = [response.data, response, form];
 
             //Set ajax status as done
             autoAjax.core.setLoading(form, false);
@@ -368,11 +368,11 @@ var autoAjax = {
                     on = vnode.data ? vnode.data.on||{} : vnode.props,
                     mergedOptions = autoAjax.core.mergeOptions({
                         //Bind Vuejs events
-                        submit : [on.submit, autoAjax.options.submit],
-                        success : [on.success, autoAjax.options.success],
-                        error : [on.error, autoAjax.options.error],
-                        validation : [on.validation, autoAjax.options.validation],
-                        complete : [on.complete, autoAjax.options.complete],
+                        submit : [on.submit, on.onSubmit, autoAjax.options.submit],
+                        success : [on.success, on.onSuccess, autoAjax.options.success],
+                        error : [on.error, on.onError, autoAjax.options.error],
+                        validation : [on.validation, on.onValidation, autoAjax.options.validation],
+                        complete : [on.complete, on.onComplete, autoAjax.options.complete],
                     }, options);
 
                 //Set vnode of element
