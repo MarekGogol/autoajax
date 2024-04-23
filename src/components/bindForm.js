@@ -50,16 +50,14 @@ var bindForm = {
             }
         }
     },
-    triggerChangeEvent(input){
-        input.each(function(){
-            $(this).change().trigger("chosen:updated");
-
+    triggerChangeEvent(inputs){
+        [...inputs].forEach((input) => {
             //Fix labels
-            this.focus();
-            this.blur();
+            input.focus();
+            input.blur();
 
-            this.dispatchEvent(new Event('input', { 'bubbles': true }));
-            this.dispatchEvent(new Event('change', { 'bubbles': true }));
+            input.dispatchEvent(new Event('input', { 'bubbles': true }));
+            input.dispatchEvent(new Event('change', { 'bubbles': true }));
         })
     },
     /**

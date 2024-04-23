@@ -1,5 +1,6 @@
 import observeDOM from './observeDOM';
 import bindForm from './bindForm';
+import { isNil } from 'lodash';
 
 var resetsForm = {
     init(form){
@@ -11,43 +12,54 @@ var resetsForm = {
     },
     saveDefaultRowValues(form){
         var values = {},
-            inputs = $(form).find('input, textarea, select');
+            inputs = [...form.querySelectorAll('input, textarea, select')];
 
-        for (var i = 0; i < inputs.length; i++) {
+        inputs.forEach(input => {
             //If default value has been saved already
-            if ( inputs[i].autoAjaxDefaultValue !== undefined )
-                continue;
+            if ( !isNil(input.autoAjaxDefaultValue) )  {
+                return;
+            }
 
-            let input = $(inputs[i]),
-                name = input.attr('name'),
-                value = input.val(),
+            let name = input.getAttribute('name'),
+                value = input.value,
                 defaultValue = null;
 
-            if ( input.is('input:checkbox') || input.is('input:radio') ) {
-                defaultValue = input.is(':checked')
+            if ( ['checkbox', 'radio'].includes(input.getAttribute('type')) ) {
+                defaultValue = input.checked ? true : false;
             }
 
             else {
-                defaultValue = input.val();
+                defaultValue = input.value;
             }
 
-            inputs[i].autoAjaxDefaultValue = defaultValue;
-        }
+            input.autoAjaxDefaultValue = defaultValue;
+        });
 
         form.autoAjaxOptions.defaultValues = values;
     },
     resetForm(form){
-        return form.find('input, select, textarea')
-            .not('input[name="_token"], input[type="submit"], input[type="hidden"], [autoAjax-noReset]')
-            .each(function(){
-                if ( $(this).is('input:checkbox') || $(this).is('input:radio') ) {
-                    $(this)[0].checked = this.autoAjaxDefaultValue;
-                } else {
-                    $(this).val(this.autoAjaxDefaultValue);
+        const resetInputs = [...form.querySelectorAll('input, select, textarea')]
+            .filter(el => {
+                if ( ['_token'].includes(el.getAttribute('name')) ){
+                    return false;
                 }
 
-                bindForm.triggerChangeEvent($(this));
+                if ( ['submit', 'hidden'].includes(el.getAttribute('type')) ){
+                    return false;
+                }
+
+                return true;
             });
+
+        resetInputs.forEach(input => {
+            if ( ['checkbox', 'radio'].includes(input.getAttribute('type')) ) {
+                input.checked = input.autoAjaxDefaultValue
+            } else {
+                input.value = input.autoAjaxDefaultValue
+            }
+        });
+
+        bindForm.triggerChangeEvent(resetInputs);
     },
 };
 

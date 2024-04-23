@@ -90,13 +90,15 @@ var autoAjax = {
             success : [
                 (data, response, form) => {
                     var options = autoAjax.core.getFormOptions(form),
-                        canResetForm = form.hasClass('autoReset') || options.autoReset === true;
+                        canResetForm = form.classList.contains('autoReset') || options.autoReset === true;
 
                     //Reset form on success message if has autoReset class
                     if ( canResetForm && !('error' in response) ) {
                         var resetItems = resetsForm.resetForm(form);
 
-                        bindForm.triggerChangeEvent(resetItems);
+                        console.log(resetItems);
+
+                        // bindForm.triggerChangeEvent(resetItems);
                     }
 
                     //Does not process success events if returned data is not object type
@@ -241,7 +243,7 @@ var autoAjax = {
             autoAjax.core.setLoading(form, false);
 
             //On success response
-            if ( [200, 201].indexOf(response.status) > -1 ) {
+            if ( [200, 201].includes(response.status) ) {
                 this.fireEventsOn([
                     options.success,
                     options.globalEvents.success
@@ -249,7 +251,7 @@ var autoAjax = {
             }
 
             //On validation error
-            else if ( response.status == 422 || response.status == 403 ) {
+            else if ( [422, 403].includes(response.status) ) {
                 this.fireEventsOn([
                     options.validation,
                     options.globalEvents.validation
@@ -379,6 +381,8 @@ var autoAjax = {
                 el.vnode = vnode;
 
                 this.registerFormSubmit(el, mergedOptions);
+
+                resetsForm.init(el);
             }),
             ...autoAjax.onUpdated((el, binding, vnode) => {
                 //If value has not been changed
@@ -461,7 +465,7 @@ var autoAjax = {
                 try {
                     let response = await options.process(method, action, data);
 
-                    console.log(response);
+                    autoAjax.core.ajaxResponse(response, form)
                 } catch (e){
                     console.error(e);
 
