@@ -23,10 +23,7 @@ var autoAjax = {
 
         //Available selectors and classes
         selectors : {
-            messageSelector: '.alert',
-            messageSuccessClass : '.alert-success',
-            messageErrorClass : '.alert-danger',
-            inputWrapperErrorClass : '.has-error',
+            inputWrapperErrorClass : 'has-error',
         },
 
         //Global messages
@@ -186,9 +183,7 @@ var autoAjax = {
          * @param  element  form
          */
         resetErrors : function(form){
-            var options = autoAjax.core.getFormOptions(form),
-                successClass = autoAjax.core.getClass('messageSuccessClass', form, true),
-                errorClass = autoAjax.core.getClass('messageErrorClass', form, true);
+            var options = autoAjax.core.getFormOptions(form);
 
             //Remove added error messages
             if ( form[0]._addedErrorMessages ) {
@@ -197,15 +192,15 @@ var autoAjax = {
                 }
             }
 
-            //Remove and hite alert message class
-            form.find(options.selectors.messageSelector)
-                .removeClass(successClass+' '+errorClass)
-                .html('')
-                .hide();
+            let classes = autoAjax.core.getClass('inputWrapperErrorClass', form).split(' ').map(c => c.includes('.') ? c : '.'+c),
+                selector = classes.join('');
 
             //Remove input wrapper class
-            form.find(autoAjax.core.getClass('inputWrapperErrorClass', form))
-                .removeClass(autoAjax.core.getClass('inputWrapperErrorClass', form, true));
+            form.querySelectorAll(selector).forEach(wrapper => {
+                classes.forEach(c => {
+                    wrapper.classList.remove(c);
+                });
+            })
         },
         getClass(key, form, onlyString){
             var options = autoAjax.core.getFormOptions(form),
@@ -461,6 +456,8 @@ var autoAjax = {
             const fire = async () => {
                 autoAjax.core.setLoading(form, true);
 
+                autoAjax.core.resetErrors(form);
+
                 try {
                     let response = await options.process(method, action, data);
 
@@ -488,24 +485,24 @@ var autoAjax = {
 
         _window.$.fn.autoAjax = function(options){
             return $(this).each(function(){
-                //If form has been initialized already
-                if ( this.autoAjaxOptions )
-                    return;
+                // //If form has been initialized already
+                // if ( this.autoAjaxOptions )
+                //     return;
 
-                var defaultOptions = cloneDeep(autoAjax.options);
+                // var defaultOptions = cloneDeep(autoAjax.options);
 
-                //Bind ajax options into exact form
-                this.autoAjaxOptions = Object.assign(autoAjax.core.mergeOptions(defaultOptions, options), {
-                    status : 'ready',
-                });
+                // //Bind ajax options into exact form
+                // this.autoAjaxOptions = Object.assign(autoAjax.core.mergeOptions(defaultOptions, options), {
+                //     status : 'ready',
+                // });
 
                 //Bind given row data and datepicker
-                resetsForm.init(this);
-                bindForm.init(this);
+                // resetsForm.init(this);
+                // bindForm.init(this);
 
-                autoSave.formAutoSave(this, this.autoAjaxOptions);
-                bindForm.bindRow(this, null, this.autoAjaxOptions);
-                bindForm.bindDatepickers(this);
+                // autoSave.formAutoSave(this, this.autoAjaxOptions);
+                // bindForm.bindRow(this, null, this.autoAjaxOptions);
+                // bindForm.bindDatepickers(this);
 
                 /*
                  * After submit form
@@ -521,13 +518,13 @@ var autoAjax = {
                         this.autoAjaxOptions.onSubmit
                     ], [form]);
 
-                    autoAjax.core.resetErrors(form);
+                    // autoAjax.core.resetErrors(form);
 
-                    form.ajaxSubmit({
-                      url: form.attr('action') || form.attr('data-action'),
-                      success: (data, type, response) => autoAjax.core.ajaxResponse(response, form),
-                      error: response => autoAjax.core.ajaxResponse(response, form),
-                    });
+                    // form.ajaxSubmit({
+                    //   url: form.attr('action') || form.attr('data-action'),
+                    //   success: (data, type, response) => autoAjax.core.ajaxResponse(response, form),
+                    //   error: response => autoAjax.core.ajaxResponse(response, form),
+                    // });
 
                     return false;
                 });
