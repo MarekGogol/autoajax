@@ -1,4 +1,4 @@
-import {cloneDeep, isEqual, isArray} from 'lodash';
+import {cloneDeep, isEqual, isArray, castArray} from 'lodash';
 import resetsForm from './components/resetsForm';
 import bindForm from './components/bindForm';
 import ErrorMessage from './components/ErrorMessage';
@@ -39,6 +39,7 @@ var autoAjax = {
         focusWrongTextInput : true,
 
         onCreate(form){ },
+        data(data){ },
         submit(form){ },
         success(data, response, form){ },
         error(data, response, form){ },
@@ -211,21 +212,15 @@ var autoAjax = {
             return selector;
         },
         fireEventsOn(functions, parameters){
-            for ( var i = 0; i < functions.length; i++ ) {
-                let callbacks = functions[i];
+            let response;
 
-                if ( callbacks ) {
-                    if ( typeof callbacks == 'function' ) {
-                        callbacks(...parameters);
-                    } else if ( typeof callbacks == 'object' ){
-                        callbacks = callbacks.filter(item => item);
+            castArray(functions).forEach(callbacks => {
+                castArray(functions).filter(item => typeof item == 'function').forEach(callback => {
+                    response = callback(...parameters)||response;
+                });
+            });
 
-                        for ( var a = 0; a < callbacks.length; a++ ){
-                            callbacks[a](...parameters);
-                        }
-                    }
-                }
-            }
+            return response;
         },
         /*
          * Return correct ajax response
@@ -372,6 +367,7 @@ var autoAjax = {
                         error : [on.error, on.onError, autoAjax.options.error],
                         validation : [on.validation, on.onValidation, autoAjax.options.validation],
                         complete : [on.complete, on.onComplete, autoAjax.options.complete],
+                        data : [on.data, on.onData, autoAjax.options.data],
                     }, options);
 
                 //Set vnode of element
@@ -441,8 +437,41 @@ var autoAjax = {
                     }
                 })
             });
+        });
+    },
+    buildFromData(form, options){
+        const data = new FormData(form);
 
-        })
+        let append = autoAjax.core.fireEventsOn([
+            options.data,
+            options.globalEvents.data
+        ], [data])||{};
+
+        append = Object.assign(append, form.__vnode?.props?.data||{});
+
+        const obj2FormData = (obj, formData = new FormData()) => {
+            const createFormData = function(obj, subKeyStr = ''){
+                for(let k in obj){
+                    let value          = obj[k];
+                    let subKeyStrTrans = subKeyStr ? subKeyStr + '[' + k + ']' : k;
+
+                    if (['string', 'number','boolean'].includes(typeof value)){
+                        formData.append(subKeyStrTrans, value);
+                    } else if (typeof value === 'object'){
+                        createFormData(value, subKeyStrTrans);
+                    }
+                }
+            }
+
+            createFormData(obj);
+
+            return formData;
+        }
+
+        //Add append data into form
+        obj2FormData(append, data);
+
+        return data;
     },
     registerFormSubmit(form, options){
         form.autoAjaxOptions = options = Object.assign(autoAjax.core.mergeOptions(cloneDeep(autoAjax.options), options), {
@@ -450,7 +479,7 @@ var autoAjax = {
         });
 
         form.addEventListener('submit', e => {
-            const data = new FormData(form),
+            const data = this.buildFromData(form, options),
                 method = form.method,
                 action = form.getAttribute('action')||form.getAttribute('data-action');
 
