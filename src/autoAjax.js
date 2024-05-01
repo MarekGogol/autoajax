@@ -518,8 +518,6 @@ var autoAjax = {
                 [data]
             ) || {};
 
-        append = Object.assign(append, form.__vnode?.props?.data || {});
-
         const obj2FormData = (obj, formData = new FormData()) => {
             const createFormData = function(obj, subKeyStr = '') {
                 for (let k in obj) {
