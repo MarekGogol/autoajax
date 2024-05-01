@@ -1,57 +1,57 @@
-import {cloneDeep, isEqual, isArray, castArray} from 'lodash';
+import { cloneDeep, isEqual, isArray, castArray } from 'lodash';
 import resetsForm from './components/resetsForm';
 import bindForm from './components/bindForm';
 import ErrorMessage from './components/ErrorMessage';
 import autoSave from './components/autoSave';
 
 var autoAjax = {
-    options : {
+    options: {
         //Auto reset form on success
-        autoReset : false,
+        autoReset: false,
 
         //Automatically save all unsaved form changed
-        autoSave : false,
+        autoSave: false,
 
         //Skip fields from autosave
-        autoSaveSkip : ['g-recaptcha-response'],
+        autoSaveSkip: ['g-recaptcha-response'],
 
         //Automaticaly add validation error messages after each bad filled input
-        showInputErrors : true,
+        showInputErrors: true,
 
         //Automatically bind validation message
-        showValidationMessage : true,
+        showValidationMessage: true,
 
         //Available selectors and classes
-        selectors : {
-            inputWrapperErrorClass : 'has-error',
+        selectors: {
+            inputWrapperErrorClass: 'has-error',
         },
 
         //Global messages
-        messages : {
-            error : 'Something went wrong, please try again later.',
+        messages: {
+            error: 'Something went wrong, please try again later.',
             validation: 'Please fill all required fields.',
         },
 
         //Scrolling on wrong input elements
-        scrollOnErrorInput : true,
-        errorInputScrollSpeed : 500,
-        errorInputScrollOffset : 100,
-        focusWrongTextInput : true,
+        scrollOnErrorInput: true,
+        errorInputScrollSpeed: 500,
+        errorInputScrollOffset: 100,
+        focusWrongTextInput: true,
 
-        onCreate(form){ },
-        data(data){ },
-        submit(form){ },
-        success(data, response, form){ },
-        error(data, response, form){ },
-        validation(data, response, form){ },
+        onCreate(form) {},
+        data(data) {},
+        submit(form) {},
+        success(data, response, form) {},
+        error(data, response, form) {},
+        validation(data, response, form) {},
 
         //Build validation error message
-        getErrorMessageElement(message, key, form){
-            return '<span class="help-block error">'+message+'</span>';
+        getErrorMessageElement(message, key, form) {
+            return '<span class="help-block error">' + message + '</span>';
         },
 
         //Add validation error message after this element
-        addErrorMessageAfterElement(input){
+        addErrorMessageAfterElement(input) {
             //You can modify, where should be placed validation error message for each input
             //If you want place validation after input parent, you can do something like:
             //return input.parent();
@@ -60,51 +60,65 @@ var autoAjax = {
         },
 
         //Returns input parrent wrapper where .has-error class will be added
-        getInputParentWrapper(input){
+        getInputParentWrapper(input) {
             return input.parent();
         },
 
         //Find form keys by
-        findFormField(form, key){
+        findFormField(form, key) {
             let selectors = [
-                'input[name="'+key+'"], select[name="'+key+'"], textarea[name="'+key+'"]',
-                'input[name="'+key+'[]"], select[name="'+key+'[]"], textarea[name="'+key+'[]"]',
+                'input[name="' +
+                    key +
+                    '"], select[name="' +
+                    key +
+                    '"], textarea[name="' +
+                    key +
+                    '"]',
+                'input[name="' +
+                    key +
+                    '[]"], select[name="' +
+                    key +
+                    '[]"], textarea[name="' +
+                    key +
+                    '[]"]',
             ].join(', ');
 
             var formId = form.getAttribute('id'),
                 //Find input in existing form
                 inputs = form.querySelectorAll(selectors);
 
-
-            if ( inputs.length == 0 && formId ){
+            if (inputs.length == 0 && formId) {
                 //Find input in whole document, assigned to form elsewhere in document by form="" attribute
-                inputs = [...document.querySelectorAll(selectors)].filter(el => {
-                    return el.getAttribute('form') == formId;
-                });
+                inputs = [...document.querySelectorAll(selectors)].filter(
+                    (el) => {
+                        return el.getAttribute('form') == formId;
+                    }
+                );
             }
 
             return [...inputs];
         },
 
         //Global callback events for every form, such as validation, error handling etc...
-        globalEvents : {
-            success : [
+        globalEvents: {
+            success: [
                 (data, response, form) => {
                     var options = autoAjax.core.getFormOptions(form),
-                        canResetForm = form.classList.contains('autoReset') || options.autoReset === true;
+                        canResetForm =
+                            form.classList.contains('autoReset') ||
+                            options.autoReset === true;
 
                     //Reset form on success message if has autoReset class
-                    if ( canResetForm && !('error' in response) ) {
+                    if (canResetForm && !('error' in response)) {
                         resetsForm.resetForm(form);
                     }
 
                     //Does not process success events if returned data is not object type
-                    if ( typeof data != 'object' )
-                        return;
+                    if (typeof data != 'object') return;
 
                     //Redirect on callback
-                    if ( 'redirect' in data && data.redirect ) {
-                        if ( data.redirect == window.location.href ) {
+                    if ('redirect' in data && data.redirect) {
+                        if (data.redirect == window.location.href) {
                             return window.location.reload();
                         }
 
@@ -112,31 +126,39 @@ var autoAjax = {
                     }
                 },
             ],
-            error : [
-                (data, response, form) => {},
-            ],
-            validation : [
+            error: [(data, response, form) => {}],
+            validation: [
                 (data, response, form) => {
                     var options = autoAjax.core.getFormOptions(form);
 
-                    if ( response.status == 422 ) {
+                    if (response.status == 422) {
                         let errors = {};
 
                         //Laravel 5.5+ provides validation errors in errors object.
-                        if ( 'errors' in data && !('length' in data.errors) ) {
+                        if ('errors' in data && !('length' in data.errors)) {
                             errors = data.errors;
                         }
 
                         //We want sorted keys by form positions, not backend validation positions
                         //Because of scrolling to field in right order
-                        let keys = autoAjax.core.sortKeysByFormOrder(form, errors);
+                        let keys = autoAjax.core.sortKeysByFormOrder(
+                            form,
+                            errors
+                        );
 
-                        for ( var i = 0; i < keys.length; i++ )
-                        {
+                        for (var i = 0; i < keys.length; i++) {
                             let key = keys[i],
-                                message = isArray(errors[key]) ? errors[key][0] : errors[key];
+                                message = isArray(errors[key])
+                                    ? errors[key][0]
+                                    : errors[key];
 
-                            (new ErrorMessage(autoAjax, options, form, key, message)).setErrorMessage();
+                            new ErrorMessage(
+                                autoAjax,
+                                options,
+                                form,
+                                key,
+                                message
+                            ).setErrorMessage();
                         }
                     }
                 },
@@ -144,25 +166,29 @@ var autoAjax = {
         },
     },
 
-    core : {
+    core: {
         /*
          * Return form options
          */
-        getFormOptions(form){
-            var options = (form.tagName == 'FORM' ? form : form[0]).autoAjaxOptions;
+        getFormOptions(form) {
+            var options = (form.tagName == 'FORM' ? form : form[0])
+                .autoAjaxOptions;
 
-            return options||{};
+            return options || {};
         },
         /*
          * Merge actual options with new given options
          * Rewrite properties in object in second level, and does not
          * throw away whole parent object, when one attribute is changed
          */
-        mergeOptions(oldOptions, newOptions){
-            for ( var k in newOptions ) {
-                if ( typeof newOptions[k] === 'object' && !newOptions[k].length ) {
-                    for ( var k1 in newOptions[k] ) {
-                        if ( !(k in oldOptions) ) {
+        mergeOptions(oldOptions, newOptions) {
+            for (var k in newOptions) {
+                if (
+                    typeof newOptions[k] === 'object' &&
+                    !newOptions[k].length
+                ) {
+                    for (var k1 in newOptions[k]) {
+                        if (!(k in oldOptions)) {
                             oldOptions[k] = newOptions[k];
                             break;
                         }
@@ -181,43 +207,48 @@ var autoAjax = {
          *
          * @param  element  form
          */
-        resetErrors : function(form){
+        resetErrors: function (form) {
             var options = autoAjax.core.getFormOptions(form);
 
             //Remove added error messages
-            if ( form[0]._addedErrorMessages ) {
-                for ( var i = 0; i < form[0]._addedErrorMessages.length; i++ ) {
+            if (form[0]._addedErrorMessages) {
+                for (var i = 0; i < form[0]._addedErrorMessages.length; i++) {
                     form[0]._addedErrorMessages[i].remove();
                 }
             }
 
-            let classes = autoAjax.core.getClass('inputWrapperErrorClass', form).split(' ').map(c => c.includes('.') ? c : '.'+c),
+            let classes = autoAjax.core
+                    .getClass('inputWrapperErrorClass', form)
+                    .split(' ')
+                    .map((c) => (c.includes('.') ? c : '.' + c)),
                 selector = classes.join('');
 
             //Remove input wrapper class
-            form.querySelectorAll(selector).forEach(wrapper => {
-                classes.forEach(c => {
+            form.querySelectorAll(selector).forEach((wrapper) => {
+                classes.forEach((c) => {
                     wrapper.classList.remove(c.replace('.', ''));
                 });
-            })
+            });
         },
-        getClass(key, form, onlyString){
+        getClass(key, form, onlyString) {
             var options = autoAjax.core.getFormOptions(form),
                 selector = options.selectors[key];
 
-            if ( onlyString === true ) {
+            if (onlyString === true) {
                 selector = selector.replace(/\./g, '');
             }
 
             return selector;
         },
-        fireEventsOn(functions, parameters){
+        fireEventsOn(functions, parameters) {
             let response;
 
-            castArray(functions).forEach(callbacks => {
-                castArray(functions).filter(item => typeof item == 'function').forEach(callback => {
-                    response = callback(...parameters)||response;
-                });
+            castArray(functions).forEach((callbacks) => {
+                castArray(functions)
+                    .filter((item) => typeof item == 'function')
+                    .forEach((callback) => {
+                        response = callback(...parameters) || response;
+                    });
             });
 
             return response;
@@ -225,8 +256,7 @@ var autoAjax = {
         /*
          * Return correct ajax response
          */
-        ajaxResponse(response, form)
-        {
+        ajaxResponse(response, form) {
             var options = form.autoAjaxOptions,
                 finalResponse = [response?.data, response, form],
                 status = response?.status;
@@ -235,60 +265,63 @@ var autoAjax = {
             autoAjax.core.setLoading(form, false);
 
             //On success response
-            if ( [200, 201].includes(status) ) {
-                this.fireEventsOn([
-                    options.success,
-                    options.globalEvents.success
-                ], finalResponse);
+            if ([200, 201].includes(status)) {
+                this.fireEventsOn(
+                    [options.success, options.globalEvents.success],
+                    finalResponse
+                );
             }
 
             //On validation error
-            else if ( [422, 403].includes(status) ) {
-                this.fireEventsOn([
-                    options.validation,
-                    options.globalEvents.validation
-                ], finalResponse);
+            else if ([422, 403].includes(status)) {
+                this.fireEventsOn(
+                    [options.validation, options.globalEvents.validation],
+                    finalResponse
+                );
             }
 
             //Other error
             else {
-                this.fireEventsOn([
-                    options.error,
-                    options.globalEvents.error
-                ], finalResponse);
+                this.fireEventsOn(
+                    [options.error, options.globalEvents.error],
+                    finalResponse
+                );
             }
 
             //On complete request
-            this.fireEventsOn([
-                options.complete,
-                options.globalEvents.complete
-            ], finalResponse);
+            this.fireEventsOn(
+                [options.complete, options.globalEvents.complete],
+                finalResponse
+            );
         },
         /*
          * Set loading status of form
          */
-        setLoading(form, state){
-            if ( !form.vnode ){
+        setLoading(form, state) {
+            if (!form.vnode) {
                 return;
             }
 
-            let props = form.vnode && form.vnode.data ? form.vnode.data.on : form.vnode.props;
+            let props =
+                form.vnode && form.vnode.data
+                    ? form.vnode.data.on
+                    : form.vnode.props;
 
-            if ( props && (props.loading||props.onLoading) ) {
+            if (props && (props.loading || props.onLoading)) {
                 props[props.loading ? 'loading' : 'onLoading'](state);
             }
 
-            if ( form && form.autoAjaxOptions ){
+            if (form && form.autoAjaxOptions) {
                 form.autoAjaxOptions.loading = state;
             }
         },
-        getFormKeyIndex(formKeys, key){
+        getFormKeyIndex(formKeys, key) {
             var index;
 
             //Find basic key, or multiple field name[]
             index = formKeys.indexOf(key);
-            index = index == -1 ? formKeys.indexOf(key+'[]') : index;
-            if ( index !== -1 ){
+            index = index == -1 ? formKeys.indexOf(key + '[]') : index;
+            if (index !== -1) {
                 return index;
             }
 
@@ -298,34 +331,41 @@ var autoAjax = {
         /*
          * Get keys from request in correct order by fields position in form
          */
-        sortKeysByFormOrder(form, obj){
-            var formKeys = [...form.querySelectorAll('input[name], textarea[name], select[name]')]
-                               .map(el => el.getAttribute('name'))
-                               .filter(name => name);
+        sortKeysByFormOrder(form, obj) {
+            var formKeys = [
+                ...form.querySelectorAll(
+                    'input[name], textarea[name], select[name]'
+                ),
+            ]
+                .map((el) => el.getAttribute('name'))
+                .filter((name) => name);
 
-            var newObjectKeys = Object.keys(obj||[]).sort((a, b) => {
-                return this.getFormKeyIndex(formKeys, a) - this.getFormKeyIndex(formKeys, b);
+            var newObjectKeys = Object.keys(obj || []).sort((a, b) => {
+                return (
+                    this.getFormKeyIndex(formKeys, a) -
+                    this.getFormKeyIndex(formKeys, b)
+                );
             });
 
             return newObjectKeys;
-        }
+        },
     },
 
-    setOptions(options){
+    setOptions(options) {
         autoAjax.core.mergeOptions(autoAjax.options, options);
 
         return this;
     },
 
-    flushAutoSave(){
+    flushAutoSave() {
         autoSave.flushData();
     },
 
     /*
      * Add support for vuejs 2 and vuejs 3
      */
-    tryNextTick(vnode, callback){
-        if ( vnode.context ){
+    tryNextTick(vnode, callback) {
+        if (vnode.context) {
             vnode.context.$nextTick(callback);
         } else {
             callback();
@@ -335,40 +375,63 @@ var autoAjax = {
     /**
      * Vuejs 2/3 callback
      */
-    onMounted(callback){
+    onMounted(callback) {
         return {
-            bind : callback,
-            mounted : callback,
+            bind: callback,
+            mounted: callback,
         };
     },
 
     /**
      * Vuejs 2/3 callback
      */
-    onUpdated(callback){
+    onUpdated(callback) {
         return {
-            update : callback,
-            updated : callback,
+            update: callback,
+            updated: callback,
         };
     },
 
     /*
      * Create installable vuejs package
      */
-    install(Vue, options){
+    install(Vue, options) {
         Vue.directive('autoAjax', {
             ...autoAjax.onMounted((el, binding, vnode, oldVnode) => {
-                var options = binding.value||{},
-                    on = vnode.data ? vnode.data.on||{} : vnode.props,
-                    mergedOptions = autoAjax.core.mergeOptions({
-                        //Bind Vuejs events
-                        submit : [on.submit, on.onSubmit, autoAjax.options.submit],
-                        success : [on.success, on.onSuccess, autoAjax.options.success],
-                        error : [on.error, on.onError, autoAjax.options.error],
-                        validation : [on.validation, on.onValidation, autoAjax.options.validation],
-                        complete : [on.complete, on.onComplete, autoAjax.options.complete],
-                        data : [on.data, on.onData, autoAjax.options.data],
-                    }, options);
+                var options = binding.value || {},
+                    on = vnode.data ? vnode.data.on || {} : vnode.props,
+                    mergedOptions = autoAjax.core.mergeOptions(
+                        {
+                            //Bind Vuejs events
+                            submit: [
+                                on.submit,
+                                on.onSubmit,
+                                autoAjax.options.submit,
+                            ],
+                            success: [
+                                on.success,
+                                on.onSuccess,
+                                autoAjax.options.success,
+                            ],
+                            error: [
+                                on.error,
+                                on.onError,
+                                autoAjax.options.error,
+                            ],
+                            validation: [
+                                on.validation,
+                                on.onValidation,
+                                autoAjax.options.validation,
+                            ],
+                            complete: [
+                                on.complete,
+                                on.onComplete,
+                                autoAjax.options.complete,
+                            ],
+                            data: [on.data, on.onData, autoAjax.options.data],
+                        },
+                        options
+                    );
 
                 //Set vnode of element
                 el.vnode = vnode;
@@ -379,34 +442,41 @@ var autoAjax = {
             }),
             ...autoAjax.onUpdated((el, binding, vnode) => {
                 //If value has not been changed
-                if ( ! binding.oldValue || isEqual(binding.value, binding.oldValue) ) {
+                if (
+                    !binding.oldValue ||
+                    isEqual(binding.value, binding.oldValue)
+                ) {
                     return;
                 }
 
-                el.autoAjaxOptions = autoAjax.core.mergeOptions(el.autoAjaxOptions, binding.value||{})
-            })
+                el.autoAjaxOptions = autoAjax.core.mergeOptions(
+                    el.autoAjaxOptions,
+                    binding.value || {}
+                );
+            }),
         });
 
         Vue.directive('autoReset', {
             ...autoAjax.onMounted((el, binding, vnode) => {
                 autoAjax.tryNextTick(vnode, () => {
-                    el.autoAjaxOptions.autoReset = true
+                    el.autoAjaxOptions.autoReset = true;
                 });
             }),
             ...autoAjax.onUpdated((el, binding, vnode) => {
-                if ( el.autoAjaxOptions ) {
-                    el.autoAjaxOptions.autoReset = binding.value === false ? false : true;
+                if (el.autoAjaxOptions) {
+                    el.autoAjaxOptions.autoReset =
+                        binding.value === false ? false : true;
                 }
             }),
         });
 
-        ['autoAjaxRow', 'bindRow', 'row'].forEach(key => {
+        ['autoAjaxRow', 'bindRow', 'row'].forEach((key) => {
             Vue.directive(key, {
                 ...autoAjax.onMounted((el, binding, vnode) => {
                     autoAjax.tryNextTick(vnode, () => {
                         var options = autoAjax.core.getFormOptions(el);
 
-                        if ( binding.value ) {
+                        if (binding.value) {
                             bindForm.bindRow(el, binding.value, options);
 
                             //Bind form also second time after 100ms, because Vuejs may not be ready yet. So we may try bind again...
@@ -420,12 +490,12 @@ var autoAjax = {
                 }),
                 ...autoAjax.onUpdated((el, binding, vnode) => {
                     //If row does not have previous value
-                    if ( isEqual(binding.value, binding.oldValue) ) {
+                    if (isEqual(binding.value, binding.oldValue)) {
                         return;
                     }
 
                     //If value has been reseted
-                    if ( binding.value === null ) {
+                    if (binding.value === null) {
                         resetsForm.resetForm($(el));
                     }
 
@@ -433,55 +503,65 @@ var autoAjax = {
                     else {
                         var options = autoAjax.core.getFormOptions(el);
 
-                        bindForm.bindRow(el, binding.value||{}, options);
+                        bindForm.bindRow(el, binding.value || {}, options);
                     }
-                })
+                }),
             });
         });
     },
-    buildFromData(form, options){
+    buildFromData(form, options) {
         const data = new FormData(form);
 
-        let append = autoAjax.core.fireEventsOn([
-            options.data,
-            options.globalEvents.data
-        ], [data])||{};
+        let append =
+            autoAjax.core.fireEventsOn(
+                [options.data, options.globalEvents.data],
+                [data]
+            ) || {};
 
-        append = Object.assign(append, form.__vnode?.props?.data||{});
+        append = Object.assign(append, form.__vnode?.props?.data || {});
 
         const obj2FormData = (obj, formData = new FormData()) => {
-            const createFormData = function(obj, subKeyStr = ''){
-                for(let k in obj){
-                    let value          = obj[k];
-                    let subKeyStrTrans = subKeyStr ? subKeyStr + '[' + k + ']' : k;
+            const createFormData = function (obj, subKeyStr = '') {
+                for (let k in obj) {
+                    let value = obj[k];
+                    let subKeyStrTrans = subKeyStr
+                        ? subKeyStr + '[' + k + ']'
+                        : k;
 
-                    if (['string', 'number','boolean'].includes(typeof value)){
+                    if (
+                        ['string', 'number', 'boolean'].includes(typeof value)
+                    ) {
                         formData.append(subKeyStrTrans, value);
-                    } else if (typeof value === 'object'){
+                    } else if (typeof value === 'object') {
                         createFormData(value, subKeyStrTrans);
                     }
                 }
-            }
+            };
 
             createFormData(obj);
 
             return formData;
-        }
+        };
 
         //Add append data into form
         obj2FormData(append, data);
 
         return data;
     },
-    registerFormSubmit(form, options){
-        form.autoAjaxOptions = options = Object.assign(autoAjax.core.mergeOptions(cloneDeep(autoAjax.options), options), {
-            loading : false
-        });
+    registerFormSubmit(form, options) {
+        form.autoAjaxOptions = options = Object.assign(
+            autoAjax.core.mergeOptions(cloneDeep(autoAjax.options), options),
+            {
+                loading: false,
+            }
+        );
 
-        form.addEventListener('submit', e => {
+        form.addEventListener('submit', (e) => {
             const data = this.buildFromData(form, options),
                 method = form.method,
-                action = form.getAttribute('action')||form.getAttribute('data-action');
+                action =
+                    form.getAttribute('action') ||
+                    form.getAttribute('data-action');
 
             const fire = async () => {
                 autoAjax.core.setLoading(form, true);
@@ -491,30 +571,30 @@ var autoAjax = {
                 try {
                     let response = await options.process(method, action, data);
 
-                    autoAjax.core.ajaxResponse(response, form)
-                } catch (e){
+                    autoAjax.core.ajaxResponse(response, form);
+                } catch (e) {
                     console.error(e);
 
-                    autoAjax.core.ajaxResponse(e.response, form)
+                    autoAjax.core.ajaxResponse(e.response, form);
                 }
 
                 autoAjax.core.setLoading(form, false);
             };
 
-            if ( form.autoAjaxOptions.loading !== true ){
+            if (form.autoAjaxOptions.loading !== true) {
                 fire();
             }
 
             e.preventDefault();
-        })
+        });
     },
-    jQueryDirective(_window){
-        if ( !_window || !(typeof _window == 'object') ){
+    jQueryDirective(_window) {
+        if (!_window || !(typeof _window == 'object')) {
             return;
         }
 
-        _window.$.fn.autoAjax = function(options){
-            return $(this).each(function(){
+        _window.$.fn.autoAjax = function (options) {
+            return $(this).each(function () {
                 // //If form has been initialized already
                 // if ( this.autoAjaxOptions )
                 //     return;
@@ -537,16 +617,19 @@ var autoAjax = {
                 /*
                  * After submit form
                  */
-                $(this).submit(function(){
-                     var form = $(this);
+                $(this).submit(function () {
+                    var form = $(this);
 
                     this.scrolledOnWrongInput = false;
 
                     //Fire submit event
-                    autoAjax.core.fireEventsOn([
-                        this.autoAjaxOptions.submit,
-                        this.autoAjaxOptions.onSubmit
-                    ], [form]);
+                    autoAjax.core.fireEventsOn(
+                        [
+                            this.autoAjaxOptions.submit,
+                            this.autoAjaxOptions.onSubmit,
+                        ],
+                        [form]
+                    );
 
                     // form.ajaxSubmit({
                     //   url: form.attr('action') || form.attr('data-action'),
@@ -558,13 +641,16 @@ var autoAjax = {
                 });
 
                 //Fire autoAjax init event
-                autoAjax.core.fireEventsOn([
-                    this.autoAjaxOptions.create,
-                    this.autoAjaxOptions.onCreate,
-                ], [$(this)]);
+                autoAjax.core.fireEventsOn(
+                    [
+                        this.autoAjaxOptions.create,
+                        this.autoAjaxOptions.onCreate,
+                    ],
+                    [$(this)]
+                );
             });
         };
-    }
-}
+    },
+};
 
 export default autoAjax;

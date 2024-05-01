@@ -1,14 +1,14 @@
 var storage = {
-    key : 'autoAjax',
+    key: 'autoAjax',
 
-    get(key){
+    get(key) {
         var data = localStorage.getItem(this.key),
-            data = JSON.parse(data||'{}');
+            data = JSON.parse(data || '{}');
 
         return key ? data[key] : data;
     },
 
-    put(key, data){
+    put(key, data) {
         var storage = this.get();
 
         storage[key] = data;
@@ -16,9 +16,9 @@ var storage = {
         localStorage.setItem(this.key, JSON.stringify(storage));
     },
 
-    flush(){
+    flush() {
         localStorage.removeItem(this.key);
-    }
+    },
 };
 
 export default storage;

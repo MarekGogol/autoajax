@@ -3,20 +3,20 @@ import bindForm from './bindForm';
 import { isNil } from 'lodash';
 
 var resetsForm = {
-    init(form){
+    init(form) {
         this.saveDefaultRowValues(form);
 
         observeDOM(form, (mutations) => {
             this.saveDefaultRowValues(form);
-        })
+        });
     },
-    saveDefaultRowValues(form){
+    saveDefaultRowValues(form) {
         var values = {},
             inputs = [...form.querySelectorAll('input, textarea, select')];
 
-        inputs.forEach(input => {
+        inputs.forEach((input) => {
             //If default value has been saved already
-            if ( !isNil(input.autoAjaxDefaultValue) )  {
+            if (!isNil(input.autoAjaxDefaultValue)) {
                 return;
             }
 
@@ -24,11 +24,9 @@ var resetsForm = {
                 value = input.value,
                 defaultValue = null;
 
-            if ( ['checkbox', 'radio'].includes(input.getAttribute('type')) ) {
+            if (['checkbox', 'radio'].includes(input.getAttribute('type'))) {
                 defaultValue = input.checked ? true : false;
-            }
-
-            else {
+            } else {
                 defaultValue = input.value;
             }
 
@@ -37,25 +35,26 @@ var resetsForm = {
 
         form.autoAjaxOptions.defaultValues = values;
     },
-    resetForm(form){
-        const resetInputs = [...form.querySelectorAll('input, select, textarea')]
-            .filter(el => {
-                if ( ['_token'].includes(el.getAttribute('name')) ){
-                    return false;
-                }
+    resetForm(form) {
+        const resetInputs = [
+            ...form.querySelectorAll('input, select, textarea'),
+        ].filter((el) => {
+            if (['_token'].includes(el.getAttribute('name'))) {
+                return false;
+            }
 
-                if ( ['submit', 'hidden'].includes(el.getAttribute('type')) ){
-                    return false;
-                }
+            if (['submit', 'hidden'].includes(el.getAttribute('type'))) {
+                return false;
+            }
 
-                return true;
-            });
+            return true;
+        });
 
-        resetInputs.forEach(input => {
-            if ( ['checkbox', 'radio'].includes(input.getAttribute('type')) ) {
-                input.checked = input.autoAjaxDefaultValue
+        resetInputs.forEach((input) => {
+            if (['checkbox', 'radio'].includes(input.getAttribute('type'))) {
+                input.checked = input.autoAjaxDefaultValue;
             } else {
-                input.value = input.autoAjaxDefaultValue
+                input.value = input.autoAjaxDefaultValue;
             }
         });
 
