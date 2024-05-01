@@ -90,7 +90,7 @@ var autoAjax = {
             if (inputs.length == 0 && formId) {
                 //Find input in whole document, assigned to form elsewhere in document by form="" attribute
                 inputs = [...document.querySelectorAll(selectors)].filter(
-                    (el) => {
+                    el => {
                         return el.getAttribute('form') == formId;
                     }
                 );
@@ -207,7 +207,7 @@ var autoAjax = {
          *
          * @param  element  form
          */
-        resetErrors: function (form) {
+        resetErrors: function(form) {
             var options = autoAjax.core.getFormOptions(form);
 
             //Remove added error messages
@@ -220,12 +220,12 @@ var autoAjax = {
             let classes = autoAjax.core
                     .getClass('inputWrapperErrorClass', form)
                     .split(' ')
-                    .map((c) => (c.includes('.') ? c : '.' + c)),
+                    .map(c => (c.includes('.') ? c : '.' + c)),
                 selector = classes.join('');
 
             //Remove input wrapper class
-            form.querySelectorAll(selector).forEach((wrapper) => {
-                classes.forEach((c) => {
+            form.querySelectorAll(selector).forEach(wrapper => {
+                classes.forEach(c => {
                     wrapper.classList.remove(c.replace('.', ''));
                 });
             });
@@ -243,10 +243,10 @@ var autoAjax = {
         fireEventsOn(functions, parameters) {
             let response;
 
-            castArray(functions).forEach((callbacks) => {
-                castArray(functions)
-                    .filter((item) => typeof item == 'function')
-                    .forEach((callback) => {
+            castArray(functions).forEach(callbacks => {
+                castArray(callbacks)
+                    .filter(item => typeof item == 'function')
+                    .forEach(callback => {
                         response = callback(...parameters) || response;
                     });
             });
@@ -337,8 +337,8 @@ var autoAjax = {
                     'input[name], textarea[name], select[name]'
                 ),
             ]
-                .map((el) => el.getAttribute('name'))
-                .filter((name) => name);
+                .map(el => el.getAttribute('name'))
+                .filter(name => name);
 
             var newObjectKeys = Object.keys(obj || []).sort((a, b) => {
                 return (
@@ -470,7 +470,7 @@ var autoAjax = {
             }),
         });
 
-        ['autoAjaxRow', 'bindRow', 'row'].forEach((key) => {
+        ['autoAjaxRow', 'bindRow', 'row'].forEach(key => {
             Vue.directive(key, {
                 ...autoAjax.onMounted((el, binding, vnode) => {
                     autoAjax.tryNextTick(vnode, () => {
@@ -521,17 +521,17 @@ var autoAjax = {
         append = Object.assign(append, form.__vnode?.props?.data || {});
 
         const obj2FormData = (obj, formData = new FormData()) => {
-            const createFormData = function (obj, subKeyStr = '') {
+            const createFormData = function(obj, subKeyStr = '') {
                 for (let k in obj) {
                     let value = obj[k];
                     let subKeyStrTrans = subKeyStr
                         ? subKeyStr + '[' + k + ']'
                         : k;
 
-                    if (
-                        ['string', 'number', 'boolean'].includes(typeof value)
-                    ) {
+                    if (['string', 'number'].includes(typeof value)) {
                         formData.append(subKeyStrTrans, value);
+                    } else if (['boolean'].includes(typeof value)) {
+                        formData.append(subKeyStrTrans, value ? 1 : 0);
                     } else if (typeof value === 'object') {
                         createFormData(value, subKeyStrTrans);
                     }
@@ -556,7 +556,7 @@ var autoAjax = {
             }
         );
 
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', e => {
             const data = this.buildFromData(form, options),
                 method = form.method,
                 action =
@@ -593,8 +593,8 @@ var autoAjax = {
             return;
         }
 
-        _window.$.fn.autoAjax = function (options) {
-            return $(this).each(function () {
+        _window.$.fn.autoAjax = function(options) {
+            return $(this).each(function() {
                 // //If form has been initialized already
                 // if ( this.autoAjaxOptions )
                 //     return;
@@ -617,7 +617,7 @@ var autoAjax = {
                 /*
                  * After submit form
                  */
-                $(this).submit(function () {
+                $(this).submit(function() {
                     var form = $(this);
 
                     this.scrolledOnWrongInput = false;
