@@ -61,14 +61,14 @@ export default class ErrorMessage {
         this.handleErrorInputChange(errorInputs, options);
 
         //Add error class on input wrapper
-        errorInputs.forEach((input) => {
+        errorInputs.forEach(input => {
             const wrapper = this.getInputParentElementsWrappers(options, input);
 
-            wrapper.forEach((element) => {
+            wrapper.forEach(element => {
                 autoAjax.core
                     .getClass('inputWrapperErrorClass', form, true)
                     .split(' ')
-                    .forEach((c) => {
+                    .forEach(c => {
                         element.classList.add(c);
                     });
             });
@@ -88,16 +88,20 @@ export default class ErrorMessage {
                 form
             );
 
-        errorInputs.forEach((input) => {
+        errorInputs.forEach(input => {
             var addAfterElement = this.getErrorInputElement(options, input);
 
             for (var i = 0; i < addAfterElement.length; i++) {
                 let addAfter = addAfterElement[i],
-                    nextElement = addAfter.nextElementSibling;
+                    nextElement = addAfter?.nextElementSibling;
 
                 //If input does not has bffer
                 if (!this._addedErrorMesageIntoInput) {
                     this._addedErrorMesageIntoInput = [];
+                }
+
+                if (!addAfter) {
+                    continue;
                 }
 
                 //If error message has not been already added on this place
@@ -125,9 +129,9 @@ export default class ErrorMessage {
 
     handleErrorInputChange(errorInputs, options) {
         //If input changes, remove errors
-        ['keyup', 'change'].forEach((eName) => {
-            errorInputs.forEach((input) => {
-                input.addEventListener(eName, (e) => {
+        ['keyup', 'change'].forEach(eName => {
+            errorInputs.forEach(input => {
+                input.addEventListener(eName, e => {
                     //On tab and esc does not remove errors
                     if (e.keyCode && [13, 9].indexOf(e.keyCode) > -1) {
                         return;
@@ -141,9 +145,9 @@ export default class ErrorMessage {
         //Vuejs support, when :value has been changed, but event has not been dispatched
         observeDOM(
             errorInputs[0],
-            (mutations) => {
+            mutations => {
                 let diffMutations = mutations.filter(
-                    (mutation) =>
+                    mutation =>
                         mutation.attributeName == 'value' &&
                         errorInputs[0].value != mutation.oldValue
                 );
@@ -162,7 +166,7 @@ export default class ErrorMessage {
             autoAjax = this.autoAjax;
 
         //We want remove all errors for input on multiple places. For example multiple checkbox.
-        errorInputs.forEach((input) => {
+        errorInputs.forEach(input => {
             //Remove all input messages
             if (input._addedErrorMesageIntoInput) {
                 for (
@@ -179,11 +183,11 @@ export default class ErrorMessage {
 
             //Remove parent error class
             this.getInputParentElementsWrappers(options, input).forEach(
-                (element) => {
+                element => {
                     autoAjax.core
                         .getClass('inputWrapperErrorClass', form, true)
                         .split(' ')
-                        .forEach((c) => {
+                        .forEach(c => {
                             element.classList.remove(c);
                         });
                 }
@@ -203,7 +207,7 @@ export default class ErrorMessage {
                 continue;
             }
 
-            const isVisible = (el) => {
+            const isVisible = el => {
                 return el.checkVisibility({
                     opacityProperty: true,
                     visibilityProperty: true,
