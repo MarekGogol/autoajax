@@ -1,20 +1,20 @@
 {
-  "name": "autoajax",
-  "version": "2.1.0",
-  "description": "AutoAjax form library for sending forms and automaticall laravel validation.",
-  "main": "src/index.js",
-  "scripts": {
-    "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
-    "prod": "npm run production"
-  },
-  "author": "Marek Gogoľ <info@marekgogol.sk>",
-  "license": "MIT",
-  "dependencies": {
-    "lodash": "^4.5.0"
-  },
-  "devDependencies": {
-    "cross-env": "^5.1",
-    "laravel-mix": "^4.0.7",
-    "vue-template-compiler": "^2.7.14"
-  }
+    "name": "autoajax",
+    "version": "2.1.1",
+    "description": "AutoAjax form library for sending forms and automaticall laravel validation.",
+    "main": "src/index.js",
+    "scripts": {
+        "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
+        "prod": "npm run production"
+    },
+    "author": "Marek Gogoľ <info@marekgogol.sk>",
+    "license": "MIT",
+    "dependencies": {
+        "lodash": "^4.5.0"
+    },
+    "devDependencies": {
+        "cross-env": "^5.1",
+        "laravel-mix": "^4.0.7",
+        "vue-template-compiler": "^2.7.14"
+    }
 }
