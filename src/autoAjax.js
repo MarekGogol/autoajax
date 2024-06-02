@@ -66,21 +66,10 @@ var autoAjax = {
 
         //Find form keys by
         findFormField(form, key) {
+            // prettier-ignore
             let selectors = [
-                'input[name="' +
-                    key +
-                    '"], select[name="' +
-                    key +
-                    '"], textarea[name="' +
-                    key +
-                    '"]',
-                'input[name="' +
-                    key +
-                    '[]"], select[name="' +
-                    key +
-                    '[]"], textarea[name="' +
-                    key +
-                    '[]"]',
+                'input[name="' +key +'"], select[name="' +key +'"], textarea[name="' +key +'"], [data-virtual-input="'+key+'"]',
+                'input[name="' +key +'[]"], select[name="' +key +'[]"], textarea[name="' +key +'[]"], [data-virtual-input="'+key+'[]"]',
             ].join(', ');
 
             var formId = form.getAttribute('id'),

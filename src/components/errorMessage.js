@@ -21,8 +21,12 @@ export default class ErrorMessage {
         return key;
     }
 
-    getErrorInputElement(options, element) {
-        let addAfterElement = options.addErrorMessageAfterElement(element);
+    getErrorInputElement(options, element, key, form) {
+        let addAfterElement = options.addErrorMessageAfterElement(
+            element,
+            key,
+            form
+        );
 
         return castArray(addAfterElement);
     }
@@ -57,7 +61,10 @@ export default class ErrorMessage {
 
         //Add error class on input wrapper
         errorInputs.forEach(input => {
-            const wrapper = this.getInputParentElementsWrappers(options, input);
+            const wrapper = this.getInputParentElementsWrappers(
+                options,
+                input
+            ).filter(item => item);
 
             wrapper.forEach(element => {
                 autoAjax.core
@@ -84,7 +91,12 @@ export default class ErrorMessage {
             );
 
         errorInputs.forEach(input => {
-            var addAfterElement = this.getErrorInputElement(options, input);
+            var addAfterElement = this.getErrorInputElement(
+                options,
+                input,
+                key,
+                form
+            );
 
             for (var i = 0; i < addAfterElement.length; i++) {
                 let addAfter = addAfterElement[i],
