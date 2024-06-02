@@ -46,11 +46,6 @@ export default class ErrorMessage {
 
         //Scroll on first error element
         if (options.scrollOnErrorInput === true && errorInputs.length > 0) {
-            let addAfterElement = this.getErrorInputElement(
-                options,
-                errorInputs[0]
-            );
-
             this.scrollOnWrongInput(errorInputs, form, options);
         }
 
