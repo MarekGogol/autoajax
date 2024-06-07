@@ -1,7 +1,7 @@
 import { cloneDeep, isEqual, isArray, castArray } from 'lodash';
 import resetsForm from './components/resetsForm';
 import bindForm from './components/bindForm';
-import ErrorMessage from './components/ErrorMessage';
+import ErrorMessage from './components/errorMessage';
 import autoSave from './components/autoSave';
 
 var autoAjax = {
