@@ -215,7 +215,9 @@ var autoAjax = {
             //Remove input wrapper class
             form.querySelectorAll(selector).forEach(wrapper => {
                 classes.forEach(c => {
-                    wrapper.classList.remove(c.replace('.', ''));
+                    if (wrapper) {
+                        wrapper.classList.remove(c.replace('.', ''));
+                    }
                 });
             });
         },
