@@ -103,8 +103,8 @@ export default class ErrorMessage {
                     nextElement = addAfter?.nextElementSibling;
 
                 //If input does not has bffer
-                if (!this._addedErrorMesageIntoInput) {
-                    this._addedErrorMesageIntoInput = [];
+                if (!input._addedErrorMesageIntoInput) {
+                    input._addedErrorMesageIntoInput = [];
                 }
 
                 if (!addAfter) {
@@ -120,7 +120,7 @@ export default class ErrorMessage {
                 }
 
                 //Add error message into buffer of actual input
-                this._addedErrorMesageIntoInput.push(
+                input._addedErrorMesageIntoInput.push(
                     addAfter.nextElementSibling
                 );
 
